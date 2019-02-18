@@ -6,13 +6,16 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: password
-
+      POSTGRES_PASSWORD: example
+    volumes:
+      - db-data:/var/lib/postgresql/data
   pgadmin4:
     image: dpage/pgadmin4
     restart: always
     ports:
       - 9080:80
     environment:
-      PGADMIN_DEFAULT_EMAIL: test@test.com
-      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DEFAULT_EMAIL: example@example.com
+      PGADMIN_DEFAULT_PASSWORD: example
+volumes:
+  db-data:
