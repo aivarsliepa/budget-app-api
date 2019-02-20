@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.models.Wallet;
-import com.aivarsliepa.budgetappapi.repositories.WalletRepository;
+import com.aivarsliepa.budgetappapi.data.models.Wallet;
+import com.aivarsliepa.budgetappapi.data.repositories.WalletRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

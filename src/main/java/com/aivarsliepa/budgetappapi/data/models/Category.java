@@ -1,10 +1,13 @@
-package com.aivarsliepa.budgetappapi.models;
+package com.aivarsliepa.budgetappapi.data.models;
 
-import com.aivarsliepa.budgetappapi.models.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Data
@@ -16,6 +19,9 @@ public class Category {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @NotNull
+    @Min(1)
+    @Max(2)
     @Column(name = "type", nullable = false)
     private Integer type;
 

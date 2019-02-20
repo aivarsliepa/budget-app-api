@@ -1,4 +1,4 @@
-package com.aivarsliepa.budgetappapi.models.enums;
+package com.aivarsliepa.budgetappapi.data.enums;
 
 import lombok.Getter;
 import lombok.NonNull;

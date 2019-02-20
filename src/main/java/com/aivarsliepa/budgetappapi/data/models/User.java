@@ -1,4 +1,4 @@
-package com.aivarsliepa.budgetappapi.models;
+package com.aivarsliepa.budgetappapi.data.models;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

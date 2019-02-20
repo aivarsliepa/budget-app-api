@@ -1,12 +1,13 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.models.Category;
-import com.aivarsliepa.budgetappapi.repositories.CategoryRepository;
+import com.aivarsliepa.budgetappapi.data.models.Category;
+import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,10 +24,11 @@ public class CategoriesController {
     }
 
     @PostMapping
-    public Category postCategory(@RequestBody final Category category) {
+    public Category postCategory(@Valid @RequestBody final Category category) {
         return categoryRepository.save(category);
     }
 
+    // TODO use id as path variable
     @DeleteMapping
     public void deleteCategory(@RequestBody final Category category) {
         categoryRepository.delete(category);

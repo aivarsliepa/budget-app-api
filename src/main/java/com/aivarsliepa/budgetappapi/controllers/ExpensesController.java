@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.models.Expense;
-import com.aivarsliepa.budgetappapi.repositories.ExpenseRepository;
+import com.aivarsliepa.budgetappapi.data.models.Expense;
+import com.aivarsliepa.budgetappapi.data.repositories.ExpenseRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

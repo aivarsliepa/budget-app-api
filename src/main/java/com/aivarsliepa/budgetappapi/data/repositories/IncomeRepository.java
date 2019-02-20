@@ -1,6 +1,6 @@
-package com.aivarsliepa.budgetappapi.repositories;
+package com.aivarsliepa.budgetappapi.data.repositories;
 
-import com.aivarsliepa.budgetappapi.models.Income;
+import com.aivarsliepa.budgetappapi.data.models.Income;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
