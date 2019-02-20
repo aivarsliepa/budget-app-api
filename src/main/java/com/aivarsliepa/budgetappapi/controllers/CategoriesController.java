@@ -1,6 +1,6 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.data.models.Category;
+import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
 import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,30 +19,30 @@ public class CategoriesController {
     private CategoryRepository categoryRepository;
 
     @GetMapping
-    public List<Category> getCategoryList() {
+    public List<CategoryModel> getCategoryList() {
         return categoryRepository.findAll();
     }
 
     @PostMapping
-    public Category postCategory(@Valid @RequestBody final Category category) {
+    public CategoryModel postCategory(@Valid @RequestBody final CategoryModel category) {
         return categoryRepository.save(category);
     }
 
     // TODO use id as path variable
     @DeleteMapping
-    public void deleteCategory(@RequestBody final Category category) {
+    public void deleteCategory(@RequestBody final CategoryModel category) {
         categoryRepository.delete(category);
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<Category> getCategory(@PathVariable final Long categoryId) {
+    public ResponseEntity<CategoryModel> getCategory(@PathVariable final Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{categoryId}")
-    public Category updateCategory(@RequestBody final Category category, @PathVariable final Long categoryId) {
+    public CategoryModel updateCategory(@RequestBody final CategoryModel category, @PathVariable final Long categoryId) {
         category.setId(categoryId);
         return categoryRepository.save(category);
     }

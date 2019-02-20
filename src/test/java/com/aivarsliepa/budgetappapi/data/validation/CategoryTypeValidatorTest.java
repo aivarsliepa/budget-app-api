@@ -1,6 +1,5 @@
 package com.aivarsliepa.budgetappapi.data.validation;
 
-
 import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
 import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
 import org.junit.Before;
