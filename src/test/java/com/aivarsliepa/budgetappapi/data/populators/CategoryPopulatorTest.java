@@ -3,7 +3,6 @@ package com.aivarsliepa.budgetappapi.data.populators;
 import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
 import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -15,73 +14,81 @@ public class CategoryPopulatorTest {
 
     private CategoryPopulator populator = new CategoryPopulator();
 
-    private CategoryData data;
-    private CategoryModel model;
-
-    private CategoryType type = CategoryType.EXPENSE;
-    private Long parentId = 2L;
-    private Long id = 1L;
-
-    private CategoryData createData() {
-        var data = new CategoryData();
-        data.setId(id);
-        data.setParentId(parentId);
-        data.setCategoryType(type);
-        return data;
-    }
-
-    private CategoryModel createModel() {
-        var model = new CategoryModel();
-        model.setCategoryType(type);
-        model.setParentId(parentId);
-        model.setId(id);
-        return model;
-    }
-
-    @Before
-    public void beforeEach() {
-        data = createData();
-        model = createModel();
-    }
+    private CategoryType TYPE = CategoryType.EXPENSE;
+    private Long PARENT_ID = 2L;
+    private Long ID = 1L;
 
     @Test
     public void shouldMapDataToModel() {
-        populator.populateModel(model, data);
+        var data = new CategoryData();
+        data.setParentId(PARENT_ID);
+        data.setCategoryType(TYPE);
 
-        assertEquals(model, createModel());
+        var expected = new CategoryModel();
+        expected.setParentId(PARENT_ID);
+        expected.setCategoryType(TYPE);
+
+        var result = populator.populateModel(new CategoryModel(), data);
+
+        assertEquals(result, expected);
     }
 
     @Test
     public void shouldMapModelToData() {
-        populator.populateData(data, model);
+        var model = new CategoryModel();
+        model.setParentId(PARENT_ID);
+        model.setCategoryType(TYPE);
+        model.setId(ID);
 
-        assertEquals(data, createData());
+        var expected = new CategoryData();
+        expected.setParentId(PARENT_ID);
+        expected.setCategoryType(TYPE);
+        expected.setId(ID);
+
+        var result = populator.populateData(new CategoryData(), model);
+
+        assertEquals(result, expected);
     }
 
     @Test
     public void populateModel_shouldNotSetType_whenNull() {
-        data.setType(null);
+        var model = new CategoryModel();
+        model.setCategoryType(TYPE);
 
-        populator.populateModel(model, data);
+        var expected = new CategoryModel();
+        expected.setCategoryType(TYPE);
 
-        assertEquals(model, createModel());
+        populator.populateModel(model, new CategoryData());
+
+        assertEquals(model, expected);
     }
 
     @Test
     public void populateModel_shouldNotSetParentId_whenNull() {
-        data.setParentId(null);
+        var model = new CategoryModel();
+        model.setParentId(PARENT_ID);
 
-        populator.populateModel(model, data);
+        var expected = new CategoryModel();
+        expected.setParentId(PARENT_ID);
 
-        assertEquals(model, createModel());
+        populator.populateModel(model, new CategoryData());
+
+        assertEquals(model, expected);
     }
 
     @Test
     public void populateModel_shouldNotSetId() {
-        data.setId(1231231L);
+        var data = new CategoryData();
+        data.setId(12123123123L);
+
+        var model = new CategoryModel();
+        model.setId(ID);
+
+        var expected = new CategoryModel();
+        expected.setId(ID);
 
         populator.populateModel(model, data);
 
-        assertEquals(model, createModel());
+        assertEquals(model, expected);
     }
 }

@@ -5,14 +5,14 @@ import com.aivarsliepa.budgetappapi.data.validation.categorytype.CategoryTypeCon
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 
 @Data
 public class CategoryData {
     private Long id;
 
-    @NotNull
+    @NotEmpty
     @CategoryTypeConstraint
     private String type;
 
