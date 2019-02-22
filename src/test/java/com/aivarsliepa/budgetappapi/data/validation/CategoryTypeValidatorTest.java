@@ -4,6 +4,8 @@ import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
 import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -11,6 +13,7 @@ import javax.validation.Validator;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(SpringRunner.class)
 public class CategoryTypeValidatorTest {
     private Validator validator;
 

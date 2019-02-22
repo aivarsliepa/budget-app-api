@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
-import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
+import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
+import com.aivarsliepa.budgetappapi.services.CategoryService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,41 +14,42 @@ import java.util.List;
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoriesController {
-
     @NonNull
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryModel> getCategoryList() {
-        return categoryRepository.findAll();
+    public List<CategoryData> getList() {
+        return categoryService.findAll();
     }
 
     @PostMapping
-    public CategoryModel postCategory(@Valid @RequestBody final CategoryModel category) {
-        return categoryRepository.save(category);
-    }
-
-    // TODO use id as path variable
-    @DeleteMapping
-    public void deleteCategory(@RequestBody final CategoryModel category) {
-        categoryRepository.delete(category);
+    public CategoryData create(@Valid @RequestBody final CategoryData category) {
+        return categoryService.create(category);
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<CategoryModel> getCategory(@PathVariable final Long categoryId) {
-        return categoryRepository.findById(categoryId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CategoryData> getById(@PathVariable final Long categoryId) {
+        return categoryService.findById(categoryId)
+                              .map(ResponseEntity::ok)
+                              .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{categoryId}")
-    public CategoryModel updateCategory(@RequestBody final CategoryModel category, @PathVariable final Long categoryId) {
-        category.setId(categoryId);
-        return categoryRepository.save(category);
+    public ResponseEntity<CategoryData> updateById(@Valid @RequestBody final CategoryData category,
+                                                       @PathVariable final Long categoryId) {
+        return categoryService.updateById(categoryId, category)
+                              .map(ResponseEntity::ok)
+                              .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{categoryId}")
-    public void deleteCategory(@PathVariable final Long categoryId) {
-        categoryRepository.deleteById(categoryId);
+    public ResponseEntity deleteById(@PathVariable final Long categoryId) {
+        var found = categoryService.deleteById(categoryId);
+
+        if (found) {
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
