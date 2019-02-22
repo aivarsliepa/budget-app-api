@@ -1,7 +1,8 @@
 package com.aivarsliepa.budgetappapi.services;
 
 import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.mappers.CategoryMapper;
+import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.populators.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -18,28 +19,22 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @NonNull
-    private CategoryMapper categoryMapper;
+    private CategoryPopulator categoryPopulator;
 
     public CategoryData create(CategoryData categoryData) {
-        categoryData.setId(null); // make sure to not override existing
-        var model = categoryMapper.map(categoryData);
+        var model = categoryPopulator.populateModel(new CategoryModel(), categoryData);
 
         var persistedModel = categoryRepository.save(model);
 
-        return categoryMapper.map(persistedModel);
+        return categoryPopulator.populateData(new CategoryData(), persistedModel);
     }
 
     public Optional<CategoryData> updateById(Long id, CategoryData categoryData) {
-        if (!categoryRepository.existsById(id)) {
-            return Optional.empty();
-        }
-
-        categoryData.setId(id);
-        var model = categoryMapper.map(categoryData);
-        var persistedModel = categoryRepository.save(model);
-        var updatedData = categoryMapper.map(persistedModel);
-
-        return Optional.of(updatedData);
+        return categoryRepository.findById(id).map(model -> {
+            categoryPopulator.populateModel(model, categoryData);
+            var updatedModel = categoryRepository.save(model);
+            return categoryPopulator.populateData(new CategoryData(), updatedModel);
+        });
     }
 
     public boolean deleteById(Long id) {
@@ -55,13 +50,13 @@ public class CategoryService {
         return categoryRepository
                 .findAll()
                 .stream()
-                .map(categoryMapper::map)
+                .map(model -> categoryPopulator.populateData(new CategoryData(), model))
                 .collect(Collectors.toList());
     }
 
     public Optional<CategoryData> findById(Long id) {
         return categoryRepository
                 .findById(id)
-                .map(categoryMapper::map);
+                .map((model -> categoryPopulator.populateData(new CategoryData(), model)));
     }
 }

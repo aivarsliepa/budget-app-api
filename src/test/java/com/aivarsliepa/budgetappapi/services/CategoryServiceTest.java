@@ -1,13 +1,12 @@
 package com.aivarsliepa.budgetappapi.services;
 
 import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.mappers.CategoryMapper;
 import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.populators.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -29,42 +28,12 @@ public class CategoryServiceTest {
     private CategoryRepository categoryRepository;
 
     @MockBean
-    private CategoryMapper categoryMapper;
+    private CategoryPopulator categoryPopulator;
 
 
     @Before
     public void setUp() {
-        categoryService = new CategoryService(categoryRepository, categoryMapper);
-    }
-
-    @Test
-    public void create_shouldSetIdToNull() {
-        var data = new CategoryData();
-        data.setId(1L);
-
-        categoryService.create(data);
-
-        var argument = ArgumentCaptor.forClass(CategoryData.class);
-
-        verify(categoryMapper).map(argument.capture());
-        assertNull(argument.getValue().getId());
-    }
-
-    @Test
-    public void updateById_shouldSetIdToGivenId() {
-        var id = Long.valueOf(2);
-        var data = new CategoryData();
-        data.setId(1L);
-
-        given(categoryRepository.existsById(id)).willReturn(true);
-        given(categoryMapper.map(nullable(CategoryModel.class))).willReturn(new CategoryData());
-
-        categoryService.updateById(id, data);
-
-        var argument = ArgumentCaptor.forClass(CategoryData.class);
-
-        verify(categoryMapper).map(argument.capture());
-        assertEquals(argument.getValue().getId(), id);
+        categoryService = new CategoryService(categoryRepository, categoryPopulator);
     }
 
     @Test
@@ -73,8 +42,9 @@ public class CategoryServiceTest {
         var inputData = mock(CategoryData.class);
         var expected = mock(CategoryData.class);
 
-        given(categoryRepository.existsById(id)).willReturn(true);
-        given(categoryMapper.map(nullable(CategoryModel.class))).willReturn(expected);
+        given(categoryRepository.findById(id)).willReturn(Optional.of(mock(CategoryModel.class)));
+        given(categoryPopulator.populateData(any(CategoryData.class), nullable(CategoryModel.class)))
+                .willReturn(expected);
 
         var result = categoryService.updateById(id, inputData);
 
@@ -90,7 +60,7 @@ public class CategoryServiceTest {
         var id = Long.valueOf(2);
         var inputData = mock(CategoryData.class);
 
-        given(categoryRepository.existsById(id)).willReturn(false);
+        given(categoryRepository.findById(id)).willReturn(Optional.empty());
 
         var result = categoryService.updateById(id, inputData);
 
@@ -132,8 +102,8 @@ public class CategoryServiceTest {
         var model2 = mock(CategoryModel.class);
 
         given(categoryRepository.findAll()).willReturn(Arrays.asList(model1, model2));
-        given(categoryMapper.map(model1)).willReturn(data1);
-        given(categoryMapper.map(model2)).willReturn(data2);
+        given(categoryPopulator.populateData(any(CategoryData.class), eq(model1))).willReturn(data1);
+        given(categoryPopulator.populateData(any(CategoryData.class), eq(model2))).willReturn(data2);
 
         var result = categoryService.findAll();
         assertThat(result, containsInAnyOrder(data1, data2));
@@ -146,7 +116,7 @@ public class CategoryServiceTest {
         var model = mock(CategoryModel.class);
 
         given(categoryRepository.findById(id)).willReturn(Optional.of(model));
-        given(categoryMapper.map(model)).willReturn(data);
+        given(categoryPopulator.populateData(any(CategoryData.class), eq(model))).willReturn(data);
 
         var result = categoryService.findById(id);
 
