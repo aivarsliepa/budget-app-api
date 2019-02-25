@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,13 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "wallets")
-public class Wallet {
+public class WalletModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @NotNull
     @Column(name = "name", nullable = false)
     private String name;
 

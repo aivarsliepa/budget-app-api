@@ -18,5 +18,5 @@ public class User {
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private List<Wallet> wallets = new ArrayList<>();
+    private List<WalletModel> wallets = new ArrayList<>();
 }

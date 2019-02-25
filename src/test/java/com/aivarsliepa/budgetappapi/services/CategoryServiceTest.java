@@ -90,7 +90,7 @@ public class CategoryServiceTest {
         var result = categoryService.deleteById(id);
 
         assertTrue(result);
-        verify(categoryRepository, times(1)).deleteById(id);
+        verify(categoryRepository).deleteById(id);
     }
 
     @Test
@@ -136,5 +136,33 @@ public class CategoryServiceTest {
         if (result.isPresent()) {
             fail("Result should be empty!");
         }
+    }
+
+    @Test
+    public void create_shouldPersist() {
+        var data = mock(CategoryData.class);
+        var model1 = mock(CategoryModel.class);
+
+        given(categoryPopulator.populateModel(any(CategoryModel.class), eq(data))).willReturn(model1);
+
+        categoryService.create(data);
+
+        verify(categoryRepository).save(model1);
+    }
+
+    @Test
+    public void create_shouldReturnData() {
+        var inputData = mock(CategoryData.class);
+        var expected = mock(CategoryData.class);
+        var model1 = mock(CategoryModel.class);
+        var model2 = mock(CategoryModel.class);
+
+        given(categoryPopulator.populateModel(any(CategoryModel.class), eq(inputData))).willReturn(model1);
+        given(categoryRepository.save(model1)).willReturn(model2);
+        given(categoryPopulator.populateData(any(CategoryData.class), eq(model2))).willReturn(expected);
+
+        var actual = categoryService.create(inputData);
+
+        assertEquals(actual, expected);
     }
 }
