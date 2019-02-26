@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.NonNull;
 
 public enum CategoryType {
-    EXPENSE(1),
-    INCOME(2);
+    EXPENSE(0),
+    INCOME(1);
 
     @Getter
     private int id;

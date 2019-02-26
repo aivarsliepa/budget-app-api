@@ -2,7 +2,6 @@ package com.aivarsliepa.budgetappapi.data.populators;
 
 import com.aivarsliepa.budgetappapi.data.dto.WalletData;
 import com.aivarsliepa.budgetappapi.data.models.WalletModel;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -50,19 +49,6 @@ public class WalletPopulatorTest {
         var result = populator.populateData(new WalletData(), model);
 
         assertEquals(result, expected);
-    }
-
-    @Test
-    public void populateModel_shouldNotSetName_whenNull() {
-        var model = new WalletModel();
-        model.setName(NAME);
-
-        var expected = new WalletModel();
-        expected.setName(NAME);
-
-        populator.populateModel(model, new WalletData());
-
-        assertEquals(model,expected);
     }
 
     @Test

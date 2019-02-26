@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 public class CategoryServiceTest {
+    private static final Long ID = 1L;
 
     private CategoryService categoryService;
 
@@ -38,15 +39,14 @@ public class CategoryServiceTest {
 
     @Test
     public void updateById_shouldReturnOptionalWithPresentData_whenFoundAndUpdated() {
-        var id = Long.valueOf(2);
         var inputData = mock(CategoryData.class);
         var expected = mock(CategoryData.class);
 
-        given(categoryRepository.findById(id)).willReturn(Optional.of(mock(CategoryModel.class)));
+        given(categoryRepository.findById(ID)).willReturn(Optional.of(mock(CategoryModel.class)));
         given(categoryPopulator.populateData(any(CategoryData.class), nullable(CategoryModel.class)))
                 .willReturn(expected);
 
-        var result = categoryService.updateById(id, inputData);
+        var result = categoryService.updateById(ID, inputData);
 
         if (result.isEmpty()) {
             fail("Result should not be empty!");
@@ -57,12 +57,11 @@ public class CategoryServiceTest {
 
     @Test
     public void updateById_shouldReturnEmptyOptional_whenNotFound() {
-        var id = Long.valueOf(2);
-        var inputData = mock(CategoryData.class);
+        var data = mock(CategoryData.class);
 
-        given(categoryRepository.findById(id)).willReturn(Optional.empty());
+        given(categoryRepository.findById(ID)).willReturn(Optional.empty());
 
-        var result = categoryService.updateById(id, inputData);
+        var result = categoryService.updateById(ID, data);
 
         if (result.isPresent()) {
             fail("Result should be empty!");
@@ -71,11 +70,9 @@ public class CategoryServiceTest {
 
     @Test
     public void deleteById_shouldNotDelete_andShouldReturnFalse_whenRecordDoesNotExist() {
-        var id = Long.valueOf(2);
+        given(categoryRepository.existsById(ID)).willReturn(false);
 
-        given(categoryRepository.existsById(id)).willReturn(false);
-
-        var result = categoryService.deleteById(id);
+        var result = categoryService.deleteById(ID);
 
         assertFalse(result);
         verify(categoryRepository, never()).deleteById(any());
@@ -83,14 +80,12 @@ public class CategoryServiceTest {
 
     @Test
     public void deleteById_shouldDelete_andShouldReturnTrue_whenRecordDoesExist() {
-        var id = Long.valueOf(2);
+        given(categoryRepository.existsById(ID)).willReturn(true);
 
-        given(categoryRepository.existsById(id)).willReturn(true);
-
-        var result = categoryService.deleteById(id);
+        var result = categoryService.deleteById(ID);
 
         assertTrue(result);
-        verify(categoryRepository).deleteById(id);
+        verify(categoryRepository).deleteById(ID);
     }
 
     @Test
@@ -111,14 +106,13 @@ public class CategoryServiceTest {
 
     @Test
     public void findById_shouldReturnOptionalWithPresentData_whenFound() {
-        var id = 1L;
         var data = mock(CategoryData.class);
         var model = mock(CategoryModel.class);
 
-        given(categoryRepository.findById(id)).willReturn(Optional.of(model));
+        given(categoryRepository.findById(ID)).willReturn(Optional.of(model));
         given(categoryPopulator.populateData(any(CategoryData.class), eq(model))).willReturn(data);
 
-        var result = categoryService.findById(id);
+        var result = categoryService.findById(ID);
 
         if (result.isEmpty()) {
             fail("Result should not be empty!");
@@ -131,7 +125,7 @@ public class CategoryServiceTest {
     public void findById_shouldReturnEmptyOptional_whenNotFound() {
         given(categoryRepository.findById(any())).willReturn(Optional.empty());
 
-        var result = categoryService.findById(1L);
+        var result = categoryService.findById(ID);
 
         if (result.isPresent()) {
             fail("Result should be empty!");
@@ -141,13 +135,13 @@ public class CategoryServiceTest {
     @Test
     public void create_shouldPersist() {
         var data = mock(CategoryData.class);
-        var model1 = mock(CategoryModel.class);
+        var model = mock(CategoryModel.class);
 
-        given(categoryPopulator.populateModel(any(CategoryModel.class), eq(data))).willReturn(model1);
+        given(categoryPopulator.populateModel(any(CategoryModel.class), eq(data))).willReturn(model);
 
         categoryService.create(data);
 
-        verify(categoryRepository).save(model1);
+        verify(categoryRepository).save(model);
     }
 
     @Test

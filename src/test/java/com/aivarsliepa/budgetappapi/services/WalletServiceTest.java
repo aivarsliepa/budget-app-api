@@ -4,6 +4,7 @@ import com.aivarsliepa.budgetappapi.data.dto.WalletData;
 import com.aivarsliepa.budgetappapi.data.models.WalletModel;
 import com.aivarsliepa.budgetappapi.data.populators.WalletPopulator;
 import com.aivarsliepa.budgetappapi.data.repositories.WalletRepository;
+import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 public class WalletServiceTest {
+
+    private static final Long ID = 1L;
 
     private WalletService walletService;
 
@@ -82,11 +85,9 @@ public class WalletServiceTest {
 
     @Test
     public void deleteById_shouldNotDelete_andShouldReturnFalse_whenRecordDoesNotExist() {
-        var id = Long.valueOf(2);
+        given(walletRepository.existsById(ID)).willReturn(false);
 
-        given(walletRepository.existsById(id)).willReturn(false);
-
-        var result = walletService.deleteById(id);
+        var result = walletService.deleteById(ID);
 
         assertFalse(result);
         verify(walletRepository, never()).deleteById(any());
@@ -94,26 +95,23 @@ public class WalletServiceTest {
 
     @Test
     public void deleteById_shouldDelete_andShouldReturnTrue_whenRecordDoesExist() {
-        var id = Long.valueOf(2);
+        given(walletRepository.existsById(ID)).willReturn(true);
 
-        given(walletRepository.existsById(id)).willReturn(true);
-
-        var result = walletService.deleteById(id);
+        var result = walletService.deleteById(ID);
 
         assertTrue(result);
-        verify(walletRepository).deleteById(id);
+        verify(walletRepository).deleteById(ID);
     }
 
     @Test
     public void findById_shouldReturnOptionalWithPresentData_whenFound() {
-        var id = 1L;
         var data = mock(WalletData.class);
         var model = mock(WalletModel.class);
 
-        given(walletRepository.findById(id)).willReturn(Optional.of(model));
+        given(walletRepository.findById(ID)).willReturn(Optional.of(model));
         given(walletPopulator.populateData(any(WalletData.class), eq(model))).willReturn(data);
 
-        var result = walletService.findById(id);
+        var result = walletService.findById(ID);
 
         if (result.isEmpty()) {
             fail("Result should not be empty!");
@@ -136,15 +134,15 @@ public class WalletServiceTest {
 
     @Test
     public void updateById_shouldReturnOptionalWithPresentData_whenFoundAndUpdated() {
-        var id = Long.valueOf(2);
         var inputData = mock(WalletData.class);
         var expected = mock(WalletData.class);
+        var model = mock(WalletModel.class);
 
-        given(walletRepository.findById(id)).willReturn(Optional.of(mock(WalletModel.class)));
+        given(walletRepository.findById(ID)).willReturn(Optional.of(model));
         given(walletPopulator.populateData(any(WalletData.class), nullable(WalletModel.class)))
                 .willReturn(expected);
 
-        var result = walletService.updateById(id, inputData);
+        var result = walletService.updateById(ID, inputData);
 
         if (result.isEmpty()) {
             fail("Result should not be empty!");
@@ -155,12 +153,11 @@ public class WalletServiceTest {
 
     @Test
     public void updateById_shouldReturnEmptyOptional_whenNotFound() {
-        var id = Long.valueOf(2);
         var inputData = mock(WalletData.class);
 
-        given(walletRepository.findById(id)).willReturn(Optional.empty());
+        given(walletRepository.findById(ID)).willReturn(Optional.empty());
 
-        var result = walletService.updateById(id, inputData);
+        var result = walletService.updateById(ID, inputData);
 
         if (result.isPresent()) {
             fail("Result should be empty!");

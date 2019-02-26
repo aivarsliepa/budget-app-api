@@ -1,6 +1,7 @@
-package com.aivarsliepa.budgetappapi.data.models;
+package com.aivarsliepa.budgetappapi.data.walletentry;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,15 +11,14 @@ import java.util.Date;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "expenses")
-public class Expense {
+@Table(name = "wallet_entries")
+public class WalletEntryModel implements WalletEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "wallet_id", nullable = false)
-    @JsonIgnore
     private Long walletId;
 
     @Column(name = "category_id", nullable = false)
@@ -29,4 +29,7 @@ public class Expense {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "type", nullable = false)
+    private CategoryType type;
 }

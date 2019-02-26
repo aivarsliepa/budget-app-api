@@ -1,6 +1,6 @@
 package com.aivarsliepa.budgetappapi.data.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,10 +24,9 @@ public class WalletModel {
     private String name;
 
     @Column(name = "user_id", nullable = false)
-    @JsonIgnore
     private Long userId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "walletId")
-    private List<Expense> expenses = new ArrayList<>();
+    private List<WalletEntryModel> entries = new ArrayList<>();
 
 }

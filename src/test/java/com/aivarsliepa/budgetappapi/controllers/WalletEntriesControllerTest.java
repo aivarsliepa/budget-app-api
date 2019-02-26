@@ -1,9 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.constants.URLPaths;
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
-import com.aivarsliepa.budgetappapi.services.CategoryService;
+import com.aivarsliepa.budgetappapi.data.dto.WalletData;
+import com.aivarsliepa.budgetappapi.services.WalletService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,10 +26,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(CategoriesController.class)
-public class CategoriesControllerTest {
+@WebMvcTest(WalletsController.class)
+public class WalletEntriesControllerTest {
 
-    private final String BASE_URL = "/categories";
+    private final String BASE_URL = "/wallets";
 
     @Autowired
     private MockMvc mvc;
@@ -40,23 +38,32 @@ public class CategoriesControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private CategoryService categoryService;
+    private WalletService walletService;
+
+    private String buildPath(Long walletId) {
+        return BASE_URL + "/" + walletId;
+    }
+
+    private String buildPath(Long walletId, Long entryId) {
+        return BASE_URL + "/" + walletId + "/entries/" + entryId;
+    }
 
     @Test
     public void getList_works() throws Exception {
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
-        data.setParentId(1L);
-        data.setId(2L);
+        var name = "test name";
+        var id = Long.valueOf(2);
 
-        given(categoryService.findAll()).willReturn(Collections.singletonList(data));
+        var data = new WalletData();
+        data.setName(name);
+        data.setId(id);
+
+        given(walletService.getList()).willReturn(Collections.singletonList(data));
 
         mvc.perform(get(BASE_URL))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$", hasSize(1)))
-//           .andExpect(jsonPath("$[0].type", is(equalTo(CategoryType.EXPENSE.getId()))))
-           .andExpect(jsonPath("$[0].parentId", is(equalTo(1))))
-           .andExpect(jsonPath("$[0].id", is(equalTo(2))));
+           .andExpect(jsonPath("$[0].name", is(equalTo(name))))
+           .andExpect(jsonPath("$[0].id", is(equalTo(id.intValue()))));
     }
 
     @Test
@@ -65,50 +72,51 @@ public class CategoriesControllerTest {
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
-        verifyZeroInteractions(categoryService);
+        verifyZeroInteractions(walletService);
     }
 
     @Test
     public void create_fails_whenBodyIsInvalid() throws Exception {
-        var data = mock(CategoryData.class);
+        var data = mock(WalletData.class);
 
         mvc.perform(post(BASE_URL, data))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
-        verifyZeroInteractions(categoryService);
+        verifyZeroInteractions(walletService);
     }
 
     @Test
     public void create_returnsData_whenBodyValid() throws Exception {
-        var requestData = new CategoryData();
-        requestData.setType(CategoryType.EXPENSE);
+        var name = "test-name";
 
-        var responseData = new CategoryData();
-        responseData.setType(CategoryType.EXPENSE);
+        var requestData = new WalletData();
+        requestData.setName(name);
+
+        var responseData = new WalletData();
+        responseData.setName(name);
         responseData.setId(1L);
 
-        given(categoryService.create(requestData)).willReturn(responseData);
+        given(walletService.create(requestData)).willReturn(responseData);
 
         var resString = mvc.perform(post(BASE_URL)
                                             .content(mapper.writeValueAsString(requestData))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
+                           .andExpect(jsonPath("$.name", is(equalTo(name))))
                            .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), responseData);
-        var test = URLPaths.Entries.TEST2;
+        assertEquals(mapper.readValue(resString, WalletData.class), responseData);
     }
 
     @Test
     public void getById_returnsNotFoundStatusAndEmptyBody_whenNoMatchingDataFound() throws Exception {
         var id = 1L;
 
-        given(categoryService.findById(id)).willReturn(Optional.empty());
+        given(walletService.findById(id)).willReturn(Optional.empty());
 
         mvc.perform(get(BASE_URL + "/" + id))
            .andExpect(status().isNotFound())
@@ -117,33 +125,35 @@ public class CategoriesControllerTest {
 
     @Test
     public void getById_returnsFoundData_whenIdMatches() throws Exception {
-        var id = Long.valueOf(1);
+        var name = "test name";
+        var id = 1L;
 
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
-        data.setId(id);
+        var data = new WalletData();
+        data.setName(name);
+        data.setId(1L);
 
-        given(categoryService.findById(id)).willReturn(Optional.of(data));
+        given(walletService.findById(id)).willReturn(Optional.of(data));
 
         var resString = mvc.perform(get(BASE_URL + "/" + id))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
-                           .andExpect(jsonPath("$.id", is(equalTo(id.intValue()))))
+                           .andExpect(jsonPath("$.name", is(equalTo(name))))
+                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), data);
+        assertEquals(mapper.readValue(resString, WalletData.class), data);
     }
 
     @Test
     public void updateById_returnsStatusNotFound_whenNotFound() throws Exception {
+        var name = "test name";
         var id = 1L;
 
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
+        var data = new WalletData();
+        data.setName(name);
 
-        given(categoryService.updateById(anyLong(), any(CategoryData.class))).willReturn(Optional.empty());
+        given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.empty());
 
         mvc.perform(post(BASE_URL + "/" + id)
                             .content(mapper.writeValueAsString(data))
@@ -154,7 +164,7 @@ public class CategoriesControllerTest {
 
     @Test
     public void updateById_returnsStatusBadRequest_whenInvalidBody() throws Exception {
-        var data = new CategoryData();
+        var data = new WalletData();
         var id = 1L;
 
         mvc.perform(post(BASE_URL + "/" + id)
@@ -166,30 +176,31 @@ public class CategoriesControllerTest {
 
     @Test
     public void updateById_returnsUpdatedData_whenValidRequest() throws Exception {
+        var name = "test name";
         var id = 1L;
 
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
+        var data = new WalletData();
+        data.setName(name);
 
-        given(categoryService.updateById(anyLong(), any(CategoryData.class))).willReturn(Optional.of(data));
+        given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.of(data));
 
         var resString = mvc.perform(post(BASE_URL + "/" + id)
                                             .content(mapper.writeValueAsString(data))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
+                           .andExpect(jsonPath("$.name", is(equalTo(name))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), data);
+        assertEquals(mapper.readValue(resString, WalletData.class), data);
     }
 
     @Test
     public void deleteById_returnsStatusNotFound_whenNotFound() throws Exception {
         var id = 1L;
 
-        given(categoryService.deleteById(id)).willReturn(false);
+        given(walletService.deleteById(id)).willReturn(false);
 
         mvc.perform(delete(BASE_URL + "/" + id))
            .andExpect(status().isNotFound())
@@ -200,7 +211,7 @@ public class CategoriesControllerTest {
     public void deleteById_returnsStatusOk_whenFoundAndDeleted() throws Exception {
         var id = 1L;
 
-        given(categoryService.deleteById(id)).willReturn(true);
+        given(walletService.deleteById(id)).willReturn(true);
 
         mvc.perform(delete(BASE_URL + "/" + id))
            .andExpect(status().isOk())

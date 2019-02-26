@@ -17,16 +17,8 @@ public class CategoryModel {
     private Long id;
 
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private CategoryType type;
 
     @Column(name = "parent_id")
     private Long parentId;
-
-    public CategoryType getCategoryType() {
-        return CategoryType.getType(type);
-    }
-
-    public void setCategoryType(final CategoryType categoryType) {
-        this.type = categoryType.getId();
-    }
 }

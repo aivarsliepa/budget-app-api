@@ -6,11 +6,13 @@ import com.aivarsliepa.budgetappapi.data.populators.WalletPopulator;
 import com.aivarsliepa.budgetappapi.data.repositories.WalletRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
 @RequiredArgsConstructor
 public class WalletService {
     @NonNull
@@ -50,9 +52,9 @@ public class WalletService {
                 .map((model -> walletPopulator.populateData(new WalletData(), model)));
     }
 
-    public Optional<WalletData> updateById(Long id, WalletData categoryData) {
+    public Optional<WalletData> updateById(Long id, WalletData data) {
         return walletRepository.findById(id).map(model -> {
-            walletPopulator.populateModel(model, categoryData);
+            walletPopulator.populateModel(model, data);
             var updatedModel = walletRepository.save(model);
             return walletPopulator.populateData(new WalletData(), updatedModel);
         });
