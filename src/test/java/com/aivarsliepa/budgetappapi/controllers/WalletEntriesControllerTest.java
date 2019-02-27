@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
 import com.aivarsliepa.budgetappapi.constants.URLPaths;
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.services.WalletEntryService;
 import com.fasterxml.jackson.databind.ObjectMapper;

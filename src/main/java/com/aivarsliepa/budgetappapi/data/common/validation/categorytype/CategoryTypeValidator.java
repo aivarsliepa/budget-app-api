@@ -1,6 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.validation.categorytype;
+package com.aivarsliepa.budgetappapi.data.common.validation.categorytype;
 
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

@@ -1,6 +1,6 @@
 package com.aivarsliepa.budgetappapi.data.walletentry;
 
-import com.aivarsliepa.budgetappapi.data.populators.Populator;
+import com.aivarsliepa.budgetappapi.data.common.Populator;
 import org.springframework.stereotype.Component;
 
 @Component

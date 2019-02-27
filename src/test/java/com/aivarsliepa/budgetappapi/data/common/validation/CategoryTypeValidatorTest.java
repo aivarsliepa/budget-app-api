@@ -1,7 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.validation;
+package com.aivarsliepa.budgetappapi.data.common.validation;
 
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.category.CategoryData;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

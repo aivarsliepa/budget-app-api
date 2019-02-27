@@ -1,7 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.populators;
+package com.aivarsliepa.budgetappapi.data.category;
 
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.common.Populator;
 import org.springframework.stereotype.Component;
 
 @Component

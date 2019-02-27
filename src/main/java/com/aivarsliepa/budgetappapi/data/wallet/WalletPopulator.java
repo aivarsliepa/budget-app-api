@@ -1,7 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.populators;
+package com.aivarsliepa.budgetappapi.data.wallet;
 
-import com.aivarsliepa.budgetappapi.data.dto.WalletData;
-import com.aivarsliepa.budgetappapi.data.models.WalletModel;
+import com.aivarsliepa.budgetappapi.data.common.Populator;
 import org.springframework.stereotype.Component;
 
 @Component

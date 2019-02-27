@@ -1,8 +1,8 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
 import com.aivarsliepa.budgetappapi.constants.URLPaths;
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.category.CategoryData;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.services.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;

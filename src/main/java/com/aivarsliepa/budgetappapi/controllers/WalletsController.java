@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
 import com.aivarsliepa.budgetappapi.constants.URLPaths;
-import com.aivarsliepa.budgetappapi.data.dto.WalletData;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
 import com.aivarsliepa.budgetappapi.services.WalletService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

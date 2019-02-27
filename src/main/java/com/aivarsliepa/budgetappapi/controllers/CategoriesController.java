@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
 import com.aivarsliepa.budgetappapi.constants.URLPaths;
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
+import com.aivarsliepa.budgetappapi.data.category.CategoryData;
 import com.aivarsliepa.budgetappapi.services.CategoryService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

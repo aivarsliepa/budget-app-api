@@ -1,5 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.models;
+package com.aivarsliepa.budgetappapi.data.user;
 
+import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

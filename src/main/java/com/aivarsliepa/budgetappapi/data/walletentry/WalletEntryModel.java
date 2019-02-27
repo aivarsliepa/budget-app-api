@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.data.walletentry;
 
 
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

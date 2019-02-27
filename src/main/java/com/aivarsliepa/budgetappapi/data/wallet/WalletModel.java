@@ -1,4 +1,4 @@
-package com.aivarsliepa.budgetappapi.data.models;
+package com.aivarsliepa.budgetappapi.data.wallet;
 
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import lombok.Data;

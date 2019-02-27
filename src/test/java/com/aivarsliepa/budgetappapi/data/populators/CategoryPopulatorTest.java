@@ -1,8 +1,9 @@
 package com.aivarsliepa.budgetappapi.data.populators;
 
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
-import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.category.CategoryData;
+import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;

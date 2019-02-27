@@ -1,4 +1,4 @@
-package com.aivarsliepa.budgetappapi.data.dto;
+package com.aivarsliepa.budgetappapi.data.wallet;
 
 import lombok.Data;
 

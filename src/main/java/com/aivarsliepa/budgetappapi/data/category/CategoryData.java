@@ -1,6 +1,6 @@
-package com.aivarsliepa.budgetappapi.data.dto;
+package com.aivarsliepa.budgetappapi.data.category;
 
-import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

@@ -1,6 +1,6 @@
 package com.aivarsliepa.budgetappapi.services;
 
-import com.aivarsliepa.budgetappapi.data.repositories.WalletRepository;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletRepository;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryPopulator;

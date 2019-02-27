@@ -1,7 +1,8 @@
 package com.aivarsliepa.budgetappapi.data.populators;
 
-import com.aivarsliepa.budgetappapi.data.dto.WalletData;
-import com.aivarsliepa.budgetappapi.data.models.WalletModel;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletPopulator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;

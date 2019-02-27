@@ -1,9 +1,9 @@
 package com.aivarsliepa.budgetappapi.services;
 
-import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
-import com.aivarsliepa.budgetappapi.data.models.CategoryModel;
-import com.aivarsliepa.budgetappapi.data.populators.CategoryPopulator;
-import com.aivarsliepa.budgetappapi.data.repositories.CategoryRepository;
+import com.aivarsliepa.budgetappapi.data.category.CategoryData;
+import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
+import com.aivarsliepa.budgetappapi.data.category.CategoryRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

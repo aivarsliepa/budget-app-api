@@ -1,10 +1,9 @@
 package com.aivarsliepa.budgetappapi.services;
 
-import com.aivarsliepa.budgetappapi.data.dto.WalletData;
-import com.aivarsliepa.budgetappapi.data.models.WalletModel;
-import com.aivarsliepa.budgetappapi.data.populators.WalletPopulator;
-import com.aivarsliepa.budgetappapi.data.repositories.WalletRepository;
-import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletPopulator;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

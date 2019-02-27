@@ -1,4 +1,4 @@
-package com.aivarsliepa.budgetappapi.data.validation.categorytype;
+package com.aivarsliepa.budgetappapi.data.common.validation.categorytype;
 
 
 import javax.validation.Constraint;
