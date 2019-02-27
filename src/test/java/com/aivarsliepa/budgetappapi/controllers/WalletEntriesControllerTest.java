@@ -1,7 +1,9 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
-import com.aivarsliepa.budgetappapi.data.dto.WalletData;
-import com.aivarsliepa.budgetappapi.services.WalletService;
+import com.aivarsliepa.budgetappapi.constants.URLPaths;
+import com.aivarsliepa.budgetappapi.data.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
+import com.aivarsliepa.budgetappapi.services.WalletEntryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,23 +15,33 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(WalletsController.class)
+@WebMvcTest(WalletEntriesController.class)
 public class WalletEntriesControllerTest {
 
-    private final String BASE_URL = "/wallets";
+    private static final CategoryType TYPE = CategoryType.INCOME;
+    private static final Date DATE = new Date();
+    private static final Long CATEGORY_ID = 3L;
+    private static final Long WALLET_ID = 1L;
+    private static final Long ENTRY_ID = 2L;
+
+
+    private static final String BASE_URL = URLPaths.Wallets.BASE + "/" + WALLET_ID + URLPaths.Wallets.ENTRIES + "/";
+    private static final String ENTRY_URL =
+            URLPaths.Wallets.BASE + "/" + WALLET_ID + URLPaths.Wallets.ENTRIES + "/" + ENTRY_ID;
 
     @Autowired
     private MockMvc mvc;
@@ -38,124 +50,122 @@ public class WalletEntriesControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private WalletService walletService;
+    private WalletEntryService walletEntryService;
 
-    private String buildPath(Long walletId) {
-        return BASE_URL + "/" + walletId;
-    }
-
-    private String buildPath(Long walletId, Long entryId) {
-        return BASE_URL + "/" + walletId + "/entries/" + entryId;
-    }
-
-    @Test
-    public void getList_works() throws Exception {
-        var name = "test name";
-        var id = Long.valueOf(2);
-
-        var data = new WalletData();
-        data.setName(name);
-        data.setId(id);
-
-        given(walletService.getList()).willReturn(Collections.singletonList(data));
-
-        mvc.perform(get(BASE_URL))
-           .andExpect(status().isOk())
-           .andExpect(jsonPath("$", hasSize(1)))
-           .andExpect(jsonPath("$[0].name", is(equalTo(name))))
-           .andExpect(jsonPath("$[0].id", is(equalTo(id.intValue()))));
+    private WalletEntryData createValidData() {
+        var data = new WalletEntryData();
+        data.setCategoryId(CATEGORY_ID);
+        data.setType(TYPE);
+        data.setDate(DATE);
+        return data;
     }
 
     @Test
-    public void create_fails_whenBodyIsEmpty() throws Exception {
+    public void getListByWalletId_test() throws Exception {
+        var data = createValidData();
+        var expectedResponseData = new WalletEntryData[]{data};
+
+        given(walletEntryService.getListByWalletId(WALLET_ID)).willReturn(Collections.singletonList(data));
+
+        var resString = mvc.perform(get(BASE_URL))
+                           .andExpect(status().isOk())
+                           .andReturn()
+                           .getResponse()
+                           .getContentAsString();
+
+        assertArrayEquals(mapper.readValue(resString, WalletEntryData[].class), expectedResponseData);
+    }
+
+    @Test
+    public void createEntryToWallet_fails_whenBodyIsEmpty() throws Exception {
         mvc.perform(post(BASE_URL))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
-        verifyZeroInteractions(walletService);
+        verifyZeroInteractions(walletEntryService);
     }
 
     @Test
-    public void create_fails_whenBodyIsInvalid() throws Exception {
-        var data = mock(WalletData.class);
+    public void createEntryToWallet_fails_whenBodyIsInvalid() throws Exception {
+        var data = new WalletEntryData();
 
-        mvc.perform(post(BASE_URL, data))
+        mvc.perform(post(BASE_URL)
+                            .content(mapper.writeValueAsString(data))
+                            .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
-        verifyZeroInteractions(walletService);
+        verifyZeroInteractions(walletEntryService);
+    }
+
+
+    @Test
+    public void createEntryToWallet_returnsBadRequestStatus_whenWalletEntryServiceReturnsEmptyOptional() throws Exception {
+        var requestData = createValidData();
+
+        given(walletEntryService.createEntryToWallet(eq(WALLET_ID), any(WalletEntryData.class))).willReturn(Optional.empty());
+
+        mvc.perform(post(BASE_URL)
+                            .content(mapper.writeValueAsString(requestData))
+                            .contentType(MediaType.APPLICATION_JSON_UTF8))
+           .andExpect(status().isBadRequest())
+           .andExpect(content().string(""));
+
+        verify(walletEntryService).createEntryToWallet(eq(WALLET_ID), any(WalletEntryData.class));
     }
 
     @Test
-    public void create_returnsData_whenBodyValid() throws Exception {
-        var name = "test-name";
+    public void createEntryToWallet_returnsData_whenWalletEntryServiceReturnsData() throws Exception {
+        var requestData = createValidData();
+        var responseData = createValidData();
+        var expected = createValidData();
 
-        var requestData = new WalletData();
-        requestData.setName(name);
-
-        var responseData = new WalletData();
-        responseData.setName(name);
-        responseData.setId(1L);
-
-        given(walletService.create(requestData)).willReturn(responseData);
+        given(walletEntryService.createEntryToWallet(WALLET_ID, requestData)).willReturn(Optional.of(responseData));
 
         var resString = mvc.perform(post(BASE_URL)
                                             .content(mapper.writeValueAsString(requestData))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
-                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), responseData);
+        assertEquals(mapper.readValue(resString, WalletEntryData.class), expected);
     }
 
     @Test
-    public void getById_returnsNotFoundStatusAndEmptyBody_whenNoMatchingDataFound() throws Exception {
-        var id = 1L;
+    public void findByIdAndWalletId_returnsNotFoundStatusAndEmptyBody_whenMatchingDataNotFound() throws Exception {
+        given(walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(Optional.empty());
 
-        given(walletService.findById(id)).willReturn(Optional.empty());
-
-        mvc.perform(get(BASE_URL + "/" + id))
+        mvc.perform(get(ENTRY_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
-    public void getById_returnsFoundData_whenIdMatches() throws Exception {
-        var name = "test name";
-        var id = 1L;
+    public void findByIdAndWalletId_returnsFoundData_whenMatchingDataFound() throws Exception {
+        var expected = createValidData();
+        var data = createValidData();
 
-        var data = new WalletData();
-        data.setName(name);
-        data.setId(1L);
+        given(walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(Optional.of(data));
 
-        given(walletService.findById(id)).willReturn(Optional.of(data));
-
-        var resString = mvc.perform(get(BASE_URL + "/" + id))
+        var resString = mvc.perform(get(ENTRY_URL))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
-                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), data);
+        assertEquals(mapper.readValue(resString, WalletEntryData.class), expected);
     }
 
     @Test
-    public void updateById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var name = "test name";
-        var id = 1L;
+    public void updateByIdAndWalletId_returnsStatusNotFound_whenNotFound() throws Exception {
+        var data = createValidData();
 
-        var data = new WalletData();
-        data.setName(name);
+        given(walletEntryService.updateByIdAndWalletId(anyLong(), anyLong(), any(WalletEntryData.class)))
+                .willReturn(Optional.empty());
 
-        given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.empty());
-
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(ENTRY_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isNotFound())
@@ -163,58 +173,54 @@ public class WalletEntriesControllerTest {
     }
 
     @Test
-    public void updateById_returnsStatusBadRequest_whenInvalidBody() throws Exception {
-        var data = new WalletData();
-        var id = 1L;
+    public void updateByIdAndWalletId_returnsStatusBadRequest_whenInvalidBody() throws Exception {
+        var data = new WalletEntryData();
 
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(ENTRY_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
+
+        verifyZeroInteractions(walletEntryService);
     }
 
     @Test
-    public void updateById_returnsUpdatedData_whenValidRequest() throws Exception {
-        var name = "test name";
-        var id = 1L;
+    public void updateByIdAndWalletId_returnsUpdatedData_whenValidRequest() throws Exception {
+        var data = createValidData();
+        var expected = createValidData();
 
-        var data = new WalletData();
-        data.setName(name);
+        given(walletEntryService.updateByIdAndWalletId(ENTRY_ID, WALLET_ID, data))
+                .willReturn(Optional.of(data));
 
-        given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.of(data));
-
-        var resString = mvc.perform(post(BASE_URL + "/" + id)
+        var resString = mvc.perform(post(ENTRY_URL)
                                             .content(mapper.writeValueAsString(data))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), data);
+        assertEquals(mapper.readValue(resString, WalletEntryData.class), expected);
     }
 
     @Test
-    public void deleteById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var id = 1L;
+    public void deleteByIdAndWalletId_returnsStatusNotFound_whenNotFound() throws Exception {
+        given(walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(false);
 
-        given(walletService.deleteById(id)).willReturn(false);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(ENTRY_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
-    public void deleteById_returnsStatusOk_whenFoundAndDeleted() throws Exception {
-        var id = 1L;
+    public void deleteByIdAndWalletId_returnsStatusOk_whenFoundAndDeleted() throws Exception {
+        given(walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(true);
 
-        given(walletService.deleteById(id)).willReturn(true);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(ENTRY_URL))
            .andExpect(status().isOk())
            .andExpect(content().string(""));
+
+        verify(walletEntryService).deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
     }
 }

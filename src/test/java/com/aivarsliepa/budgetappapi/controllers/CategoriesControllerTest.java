@@ -17,21 +17,24 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CategoriesController.class)
 public class CategoriesControllerTest {
 
-    private final String BASE_URL = "/categories";
+    private static final Long CATEGORY_ID = 1L;
+    private static final Long PARENT_CATEGORY_ID = 2L;
+
+    private static final String BASE_URL = URLPaths.Categories.BASE;
+    private static final String CATEGORY_URL = BASE_URL + "/" + CATEGORY_ID;
 
     @Autowired
     private MockMvc mvc;
@@ -42,21 +45,28 @@ public class CategoriesControllerTest {
     @MockBean
     private CategoryService categoryService;
 
-    @Test
-    public void getList_works() throws Exception {
+    private CategoryData createValidData() {
         var data = new CategoryData();
         data.setType(CategoryType.EXPENSE);
-        data.setParentId(1L);
-        data.setId(2L);
+        data.setParentId(PARENT_CATEGORY_ID);
+        data.setId(CATEGORY_ID);
+        return data;
+    }
+
+    @Test
+    public void getList_works() throws Exception {
+        var data = createValidData();
+        var expectedResponseData = new CategoryData[]{data};
 
         given(categoryService.findAll()).willReturn(Collections.singletonList(data));
 
-        mvc.perform(get(BASE_URL))
-           .andExpect(status().isOk())
-           .andExpect(jsonPath("$", hasSize(1)))
-//           .andExpect(jsonPath("$[0].type", is(equalTo(CategoryType.EXPENSE.getId()))))
-           .andExpect(jsonPath("$[0].parentId", is(equalTo(1))))
-           .andExpect(jsonPath("$[0].id", is(equalTo(2))));
+        var resString = mvc.perform(get(BASE_URL))
+                           .andExpect(status().isOk())
+                           .andReturn()
+                           .getResponse()
+                           .getContentAsString();
+
+        assertArrayEquals(mapper.readValue(resString, CategoryData[].class), expectedResponseData);
     }
 
     @Test
@@ -70,9 +80,11 @@ public class CategoriesControllerTest {
 
     @Test
     public void create_fails_whenBodyIsInvalid() throws Exception {
-        var data = mock(CategoryData.class);
+        var data = new CategoryData();
 
-        mvc.perform(post(BASE_URL, data))
+        mvc.perform(post(BASE_URL)
+                            .content(mapper.writeValueAsString(data))
+                            .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
@@ -81,12 +93,9 @@ public class CategoriesControllerTest {
 
     @Test
     public void create_returnsData_whenBodyValid() throws Exception {
-        var requestData = new CategoryData();
-        requestData.setType(CategoryType.EXPENSE);
-
-        var responseData = new CategoryData();
-        responseData.setType(CategoryType.EXPENSE);
-        responseData.setId(1L);
+        var requestData = createValidData();
+        var responseData = createValidData();
+        var expected = createValidData();
 
         given(categoryService.create(requestData)).willReturn(responseData);
 
@@ -94,58 +103,45 @@ public class CategoriesControllerTest {
                                             .content(mapper.writeValueAsString(requestData))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
-                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), responseData);
-        var test = URLPaths.Entries.TEST2;
+        assertEquals(mapper.readValue(resString, CategoryData.class), expected);
     }
 
     @Test
     public void getById_returnsNotFoundStatusAndEmptyBody_whenNoMatchingDataFound() throws Exception {
-        var id = 1L;
+        given(categoryService.findById(CATEGORY_ID)).willReturn(Optional.empty());
 
-        given(categoryService.findById(id)).willReturn(Optional.empty());
-
-        mvc.perform(get(BASE_URL + "/" + id))
+        mvc.perform(get(CATEGORY_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
     public void getById_returnsFoundData_whenIdMatches() throws Exception {
-        var id = Long.valueOf(1);
+        var data = createValidData();
+        var expected = createValidData();
 
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
-        data.setId(id);
+        given(categoryService.findById(CATEGORY_ID)).willReturn(Optional.of(data));
 
-        given(categoryService.findById(id)).willReturn(Optional.of(data));
-
-        var resString = mvc.perform(get(BASE_URL + "/" + id))
+        var resString = mvc.perform(get(CATEGORY_URL))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
-                           .andExpect(jsonPath("$.id", is(equalTo(id.intValue()))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), data);
+        assertEquals(mapper.readValue(resString, CategoryData.class), expected);
     }
 
     @Test
     public void updateById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var id = 1L;
-
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
+        var data = createValidData();
 
         given(categoryService.updateById(anyLong(), any(CategoryData.class))).willReturn(Optional.empty());
 
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(CATEGORY_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isNotFound())
@@ -155,55 +151,51 @@ public class CategoriesControllerTest {
     @Test
     public void updateById_returnsStatusBadRequest_whenInvalidBody() throws Exception {
         var data = new CategoryData();
-        var id = 1L;
 
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(CATEGORY_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
+
+        verifyZeroInteractions(categoryService);
     }
 
     @Test
     public void updateById_returnsUpdatedData_whenValidRequest() throws Exception {
-        var id = 1L;
-
-        var data = new CategoryData();
-        data.setType(CategoryType.EXPENSE);
+        var data = createValidData();
+        var expected = createValidData();
 
         given(categoryService.updateById(anyLong(), any(CategoryData.class))).willReturn(Optional.of(data));
 
-        var resString = mvc.perform(post(BASE_URL + "/" + id)
+        var resString = mvc.perform(post(CATEGORY_URL)
                                             .content(mapper.writeValueAsString(data))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-//                           .andExpect(jsonPath("$.type", is(equalTo(CategoryType.EXPENSE.getId()))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, CategoryData.class), data);
+        assertEquals(mapper.readValue(resString, CategoryData.class), expected);
     }
 
     @Test
     public void deleteById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var id = 1L;
+        given(categoryService.deleteById(CATEGORY_ID)).willReturn(false);
 
-        given(categoryService.deleteById(id)).willReturn(false);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(CATEGORY_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
     public void deleteById_returnsStatusOk_whenFoundAndDeleted() throws Exception {
-        var id = 1L;
+        given(categoryService.deleteById(CATEGORY_ID)).willReturn(true);
 
-        given(categoryService.deleteById(id)).willReturn(true);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(CATEGORY_URL))
            .andExpect(status().isOk())
            .andExpect(content().string(""));
+
+        verify(categoryService).deleteById(CATEGORY_ID);
     }
 }

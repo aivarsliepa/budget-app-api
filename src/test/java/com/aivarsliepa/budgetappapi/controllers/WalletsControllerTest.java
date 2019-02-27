@@ -1,5 +1,6 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
+import com.aivarsliepa.budgetappapi.constants.URLPaths;
 import com.aivarsliepa.budgetappapi.data.dto.WalletData;
 import com.aivarsliepa.budgetappapi.services.WalletService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,21 +16,23 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(WalletsController.class)
 public class WalletsControllerTest {
+    private static final String WALLET_NAME = "some test name";
+    private static final Long WALLET_ID = 2L;
 
-    private final String BASE_URL = "/wallets";
+    private static final String BASE_URL = URLPaths.Wallets.BASE;
+    private static final String WALLET_URL = BASE_URL + "/" + WALLET_ID;
 
     @Autowired
     private MockMvc mvc;
@@ -40,22 +43,27 @@ public class WalletsControllerTest {
     @MockBean
     private WalletService walletService;
 
+    private WalletData createValidData() {
+        var data = new WalletData();
+        data.setName(WALLET_NAME);
+        data.setId(WALLET_ID);
+        return data;
+    }
+
     @Test
     public void getList_works() throws Exception {
-        var name = "test name";
-        var id = Long.valueOf(2);
-
-        var data = new WalletData();
-        data.setName(name);
-        data.setId(id);
+        var data = createValidData();
+        var expectedResponseData = new WalletData[]{createValidData()};
 
         given(walletService.getList()).willReturn(Collections.singletonList(data));
 
-        mvc.perform(get(BASE_URL))
-           .andExpect(status().isOk())
-           .andExpect(jsonPath("$", hasSize(1)))
-           .andExpect(jsonPath("$[0].name", is(equalTo(name))))
-           .andExpect(jsonPath("$[0].id", is(equalTo(id.intValue()))));
+        var resString = mvc.perform(get(BASE_URL))
+                           .andExpect(status().isOk())
+                           .andReturn()
+                           .getResponse()
+                           .getContentAsString();
+
+        assertArrayEquals(mapper.readValue(resString, WalletData[].class), expectedResponseData);
     }
 
     @Test
@@ -69,9 +77,11 @@ public class WalletsControllerTest {
 
     @Test
     public void create_fails_whenBodyIsInvalid() throws Exception {
-        var data = mock(WalletData.class);
+        var data = new WalletData();
 
-        mvc.perform(post(BASE_URL, data))
+        mvc.perform(post(BASE_URL)
+                            .content(mapper.writeValueAsString(data))
+                            .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
 
@@ -80,14 +90,9 @@ public class WalletsControllerTest {
 
     @Test
     public void create_returnsData_whenBodyValid() throws Exception {
-        var name = "test-name";
-
-        var requestData = new WalletData();
-        requestData.setName(name);
-
-        var responseData = new WalletData();
-        responseData.setName(name);
-        responseData.setId(1L);
+        var requestData = createValidData();
+        var responseData = createValidData();
+        var expected = createValidData();
 
         given(walletService.create(requestData)).willReturn(responseData);
 
@@ -95,59 +100,45 @@ public class WalletsControllerTest {
                                             .content(mapper.writeValueAsString(requestData))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
-                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), responseData);
+        assertEquals(mapper.readValue(resString, WalletData.class), expected);
     }
 
     @Test
     public void getById_returnsNotFoundStatusAndEmptyBody_whenNoMatchingDataFound() throws Exception {
-        var id = 1L;
+        given(walletService.findById(WALLET_ID)).willReturn(Optional.empty());
 
-        given(walletService.findById(id)).willReturn(Optional.empty());
-
-        mvc.perform(get(BASE_URL + "/" + id))
+        mvc.perform(get(WALLET_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
     public void getById_returnsFoundData_whenIdMatches() throws Exception {
-        var name = "test name";
-        var id = 1L;
+        var data = createValidData();
+        var expected = createValidData();
 
-        var data = new WalletData();
-        data.setName(name);
-        data.setId(1L);
+        given(walletService.findById(WALLET_ID)).willReturn(Optional.of(data));
 
-        given(walletService.findById(id)).willReturn(Optional.of(data));
-
-        var resString = mvc.perform(get(BASE_URL + "/" + id))
+        var resString = mvc.perform(get(WALLET_URL))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
-                           .andExpect(jsonPath("$.id", is(equalTo(1))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), data);
+        assertEquals(mapper.readValue(resString, WalletData.class), expected);
     }
 
     @Test
     public void updateById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var name = "test name";
-        var id = 1L;
-
-        var data = new WalletData();
-        data.setName(name);
+        var data = createValidData();
 
         given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.empty());
 
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(WALLET_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isNotFound())
@@ -157,56 +148,51 @@ public class WalletsControllerTest {
     @Test
     public void updateById_returnsStatusBadRequest_whenInvalidBody() throws Exception {
         var data = new WalletData();
-        var id = 1L;
 
-        mvc.perform(post(BASE_URL + "/" + id)
+        mvc.perform(post(WALLET_URL)
                             .content(mapper.writeValueAsString(data))
                             .contentType(MediaType.APPLICATION_JSON_UTF8))
            .andExpect(status().isBadRequest())
            .andExpect(content().string(""));
+
+        verifyZeroInteractions(walletService);
     }
 
     @Test
     public void updateById_returnsUpdatedData_whenValidRequest() throws Exception {
-        var name = "test name";
-        var id = 1L;
-
-        var data = new WalletData();
-        data.setName(name);
+        var data = createValidData();
+        var expected = createValidData();
 
         given(walletService.updateById(anyLong(), any(WalletData.class))).willReturn(Optional.of(data));
 
-        var resString = mvc.perform(post(BASE_URL + "/" + id)
+        var resString = mvc.perform(post(WALLET_URL)
                                             .content(mapper.writeValueAsString(data))
                                             .contentType(MediaType.APPLICATION_JSON_UTF8))
                            .andExpect(status().isOk())
-                           .andExpect(jsonPath("$.name", is(equalTo(name))))
                            .andReturn()
                            .getResponse()
                            .getContentAsString();
 
-        assertEquals(mapper.readValue(resString, WalletData.class), data);
+        assertEquals(mapper.readValue(resString, WalletData.class), expected);
     }
 
     @Test
     public void deleteById_returnsStatusNotFound_whenNotFound() throws Exception {
-        var id = 1L;
+        given(walletService.deleteById(WALLET_ID)).willReturn(false);
 
-        given(walletService.deleteById(id)).willReturn(false);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(WALLET_URL))
            .andExpect(status().isNotFound())
            .andExpect(content().string(""));
     }
 
     @Test
     public void deleteById_returnsStatusOk_whenFoundAndDeleted() throws Exception {
-        var id = 1L;
+        given(walletService.deleteById(WALLET_ID)).willReturn(true);
 
-        given(walletService.deleteById(id)).willReturn(true);
-
-        mvc.perform(delete(BASE_URL + "/" + id))
+        mvc.perform(delete(WALLET_URL))
            .andExpect(status().isOk())
            .andExpect(content().string(""));
+
+        verify(walletService).deleteById(WALLET_ID);
     }
 }

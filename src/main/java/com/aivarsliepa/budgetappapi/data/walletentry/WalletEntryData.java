@@ -10,8 +10,10 @@ import java.util.Date;
 public class WalletEntryData implements WalletEntry {
     private Long id;
 
+    @NotNull
     private Long categoryId;
 
+    @NotNull
     private Date date;
 
     private String description;

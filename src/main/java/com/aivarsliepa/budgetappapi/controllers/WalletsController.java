@@ -1,5 +1,6 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
+import com.aivarsliepa.budgetappapi.constants.URLPaths;
 import com.aivarsliepa.budgetappapi.data.dto.WalletData;
 import com.aivarsliepa.budgetappapi.services.WalletService;
 import lombok.NonNull;
@@ -11,7 +12,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/wallets")
+@RequestMapping(URLPaths.Wallets.BASE)
 @RequiredArgsConstructor
 public class WalletsController {
     @NonNull

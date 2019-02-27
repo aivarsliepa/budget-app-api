@@ -1,5 +1,6 @@
 package com.aivarsliepa.budgetappapi.controllers;
 
+import com.aivarsliepa.budgetappapi.constants.URLPaths;
 import com.aivarsliepa.budgetappapi.data.dto.CategoryData;
 import com.aivarsliepa.budgetappapi.services.CategoryService;
 import lombok.NonNull;
@@ -11,7 +12,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping(URLPaths.Categories.BASE)
 @RequiredArgsConstructor
 public class CategoriesController {
     @NonNull
@@ -36,7 +37,7 @@ public class CategoriesController {
 
     @PostMapping("/{categoryId}")
     public ResponseEntity<CategoryData> updateById(@Valid @RequestBody final CategoryData category,
-                                                       @PathVariable final Long categoryId) {
+                                                   @PathVariable final Long categoryId) {
         return categoryService.updateById(categoryId, category)
                               .map(ResponseEntity::ok)
                               .orElse(ResponseEntity.notFound().build());

@@ -10,7 +10,9 @@ public final class URLPaths {
 
     public final class Wallets {
         public static final String BASE = "/wallets";
-        public static final String ENTRY = "/entries";
+
+        // -> /wallets/{walletId}/entries
+        public static final String ENTRIES = "/entries";
 
         private Wallets() {
         }
