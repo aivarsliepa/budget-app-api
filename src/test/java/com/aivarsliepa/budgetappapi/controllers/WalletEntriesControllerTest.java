@@ -77,15 +77,6 @@ public class WalletEntriesControllerTest {
     }
 
     @Test
-    public void createEntryToWallet_fails_whenBodyIsEmpty() throws Exception {
-        mvc.perform(post(BASE_URL))
-           .andExpect(status().isBadRequest())
-           .andExpect(content().string(""));
-
-        verifyZeroInteractions(walletEntryService);
-    }
-
-    @Test
     public void createEntryToWallet_fails_whenBodyIsInvalid() throws Exception {
         var data = new WalletEntryData();
 

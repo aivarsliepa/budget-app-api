@@ -70,15 +70,6 @@ public class CategoriesControllerTest {
     }
 
     @Test
-    public void create_fails_whenBodyIsEmpty() throws Exception {
-        mvc.perform(post(BASE_URL))
-           .andExpect(status().isBadRequest())
-           .andExpect(content().string(""));
-
-        verifyZeroInteractions(categoryService);
-    }
-
-    @Test
     public void create_fails_whenBodyIsInvalid() throws Exception {
         var data = new CategoryData();
 

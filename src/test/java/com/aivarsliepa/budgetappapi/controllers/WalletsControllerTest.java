@@ -76,19 +76,6 @@ public class WalletsControllerTest {
     }
 
     @Test
-    public void create_fails_whenBodyIsInvalid() throws Exception {
-        var data = new WalletData();
-
-        mvc.perform(post(BASE_URL)
-                            .content(mapper.writeValueAsString(data))
-                            .contentType(MediaType.APPLICATION_JSON_UTF8))
-           .andExpect(status().isBadRequest())
-           .andExpect(content().string(""));
-
-        verifyZeroInteractions(walletService);
-    }
-
-    @Test
     public void create_returnsData_whenBodyValid() throws Exception {
         var requestData = createValidData();
         var responseData = createValidData();
