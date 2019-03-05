@@ -4,6 +4,7 @@ import com.aivarsliepa.budgetappapi.constants.URLPaths;
 import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
 import com.aivarsliepa.budgetappapi.services.WalletService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @WebMvcTest(WalletsController.class)
 public class WalletsControllerTest {

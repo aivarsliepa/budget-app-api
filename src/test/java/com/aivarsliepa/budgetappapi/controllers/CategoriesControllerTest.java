@@ -5,6 +5,7 @@ import com.aivarsliepa.budgetappapi.data.category.CategoryData;
 import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.services.CategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @WebMvcTest(CategoriesController.class)
 public class CategoriesControllerTest {
@@ -190,3 +192,6 @@ public class CategoriesControllerTest {
         verify(categoryService).deleteById(CATEGORY_ID);
     }
 }
+
+
+

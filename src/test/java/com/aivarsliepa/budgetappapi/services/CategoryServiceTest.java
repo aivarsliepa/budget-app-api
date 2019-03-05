@@ -4,6 +4,7 @@ import com.aivarsliepa.budgetappapi.data.category.CategoryData;
 import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.category.CategoryRepository;
+import com.aivarsliepa.budgetappapi.security.RestAuthenticationEntryPoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,10 +32,12 @@ public class CategoryServiceTest {
     @MockBean
     private CategoryPopulator categoryPopulator;
 
+    @MockBean
+    private AuthService authService;
 
     @Before
     public void setUp() {
-        categoryService = new CategoryService(categoryRepository, categoryPopulator);
+        categoryService = new CategoryService(categoryRepository, categoryPopulator, authService);
     }
 
     @Test

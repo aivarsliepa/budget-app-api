@@ -2,12 +2,12 @@ package com.aivarsliepa.budgetappapi.data.wallet;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
 
 @Data
 public class WalletData {
     private Long id;
 
-    @NotEmpty
+    @NotBlank
     private String name;
 }

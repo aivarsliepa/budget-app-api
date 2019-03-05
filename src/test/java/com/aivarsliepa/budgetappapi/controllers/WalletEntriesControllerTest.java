@@ -5,6 +5,7 @@ import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.services.WalletEntryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @WebMvcTest(WalletEntriesController.class)
 public class WalletEntriesControllerTest {

@@ -6,12 +6,14 @@ import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.category.CategoryRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -20,6 +22,9 @@ public class CategoryService {
 
     @NonNull
     private CategoryPopulator categoryPopulator;
+
+    @NonNull
+    private AuthService authService;
 
     public CategoryData create(CategoryData categoryData) {
         var model = categoryPopulator.populateModel(new CategoryModel(), categoryData);
