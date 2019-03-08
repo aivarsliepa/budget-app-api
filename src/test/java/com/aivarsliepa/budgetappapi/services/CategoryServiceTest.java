@@ -49,7 +49,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void updateById_shouldReturnOptionalWithPresentData_whenFoundAndUpdated() {
+    public void updateById_shouldUpdate_whenFound() {
         var inputData = mock(CategoryData.class);
         var model = mock(CategoryModel.class);
 

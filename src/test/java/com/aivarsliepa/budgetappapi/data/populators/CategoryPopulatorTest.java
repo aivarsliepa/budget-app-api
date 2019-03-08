@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 public class CategoryPopulatorTest {
@@ -56,5 +57,14 @@ public class CategoryPopulatorTest {
         populator.populateModel(model, data);
 
         assertEquals(ID, model.getId());
+    }
+
+    @Test
+    public void populateModel_shouldReturnSameModel() {
+        var model = mock(CategoryModel.class);
+
+        var result = populator.populateModel(model, new CategoryData());
+
+        assertEquals(result, model);
     }
 }

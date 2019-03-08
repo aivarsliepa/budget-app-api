@@ -4,6 +4,7 @@ import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
 import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
 import com.aivarsliepa.budgetappapi.data.wallet.WalletPopulator;
 import com.aivarsliepa.budgetappapi.data.wallet.WalletRepository;
+import com.aivarsliepa.budgetappapi.exceptions.ResourceNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,12 @@ public class WalletService {
     @NonNull
     private WalletPopulator walletPopulator;
 
-    public List<WalletData> getList() {
+    @NonNull
+    private AuthService authService;
+
+    public List<WalletData> getListForCurrentUser() {
         return walletRepository
-                .findAll()
+                .findAllByUserId(authService.getCurrentUserId())
                 .stream()
                 .map(model -> walletPopulator.populateData(new WalletData(), model))
                 .collect(Collectors.toList());
@@ -31,32 +35,39 @@ public class WalletService {
 
     public WalletData create(WalletData walletData) {
         var model = walletPopulator.populateModel(new WalletModel(), walletData);
+        model.setUserId(authService.getCurrentUserId());
 
         var persistedModel = walletRepository.save(model);
 
         return walletPopulator.populateData(new WalletData(), persistedModel);
     }
 
-    public boolean deleteById(Long id) {
-        if (!walletRepository.existsById(id)) {
-            return false;
+    public void deleteById(Long id) {
+        var userId = authService.getCurrentUserId();
+
+        if (!walletRepository.existsByIdAndUserId(id, userId)) {
+            var msg = "Wallet not found for with id: " + id + "; for userId: " + userId;
+            throw new ResourceNotFoundException(msg);
         }
 
-        walletRepository.deleteById(id);
-        return true;
+        walletRepository.deleteByIdAndUserId(id, userId);
     }
 
     public Optional<WalletData> findById(Long id) {
         return walletRepository
-                .findById(id)
+                .findByIdAndUserId(id, authService.getCurrentUserId())
                 .map((model -> walletPopulator.populateData(new WalletData(), model)));
     }
 
-    public Optional<WalletData> updateById(Long id, WalletData data) {
-        return walletRepository.findById(id).map(model -> {
-            walletPopulator.populateModel(model, data);
-            var updatedModel = walletRepository.save(model);
-            return walletPopulator.populateData(new WalletData(), updatedModel);
-        });
+    public void updateById(Long id, WalletData data) {
+        walletRepository
+                .findByIdAndUserId(id, authService.getCurrentUserId())
+                .ifPresentOrElse(
+                        model -> walletPopulator.populateModel(model, data),
+                        () -> {
+                            var msg = data.toString() + " not found for userId: " + id;
+                            throw new ResourceNotFoundException(msg);
+                        }
+                );
     }
 }

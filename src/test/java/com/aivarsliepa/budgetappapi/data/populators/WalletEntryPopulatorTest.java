@@ -1,7 +1,7 @@
 package com.aivarsliepa.budgetappapi.data.populators;
 
-import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryPopulator;
 import org.junit.Test;
@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 public class WalletEntryPopulatorTest {
@@ -22,29 +23,21 @@ public class WalletEntryPopulatorTest {
     private final Date DATE = new Date();
     private final Long CATEGORY_ID = 2L;
     private final Long ID = 1L;
-    private final Long WALLET_ID = 3L;
 
     @Test
     public void shouldMapDataToModel() {
-        var model = new WalletEntryModel();
-        model.setWalletId(WALLET_ID);
-
         var data = new WalletEntryData();
         data.setCategoryId(CATEGORY_ID);
         data.setDescription(DESCRIPTION);
         data.setDate(DATE);
         data.setType(TYPE);
 
-        var expected = new WalletEntryModel();
-        expected.setCategoryId(CATEGORY_ID);
-        expected.setDescription(DESCRIPTION);
-        expected.setDate(DATE);
-        expected.setType(TYPE);
-        expected.setWalletId(WALLET_ID);
+        var result = populator.populateModel(new WalletEntryModel(), data);
 
-        var actual = populator.populateModel(model, data);
-
-        assertEquals(actual, expected);
+        assertEquals(CATEGORY_ID, result.getCategoryId());
+        assertEquals(DESCRIPTION, result.getDescription());
+        assertEquals(DATE, result.getDate());
+        assertEquals(TYPE, result.getType());
     }
 
     @Test
@@ -56,16 +49,13 @@ public class WalletEntryPopulatorTest {
         model.setDate(DATE);
         model.setId(ID);
 
-        var expected = new WalletEntryData();
-        expected.setCategoryId(CATEGORY_ID);
-        expected.setDescription(DESCRIPTION);
-        expected.setType(TYPE);
-        expected.setDate(DATE);
-        expected.setId(ID);
+        var result = populator.populateData(new WalletEntryData(), model);
 
-        var actual = populator.populateData(new WalletEntryData(), model);
-
-        assertEquals(actual, expected);
+        assertEquals(CATEGORY_ID, result.getCategoryId());
+        assertEquals(DESCRIPTION, result.getDescription());
+        assertEquals(TYPE, result.getType());
+        assertEquals(DATE, result.getDate());
+        assertEquals(ID, result.getId());
     }
 
     @Test
@@ -76,11 +66,17 @@ public class WalletEntryPopulatorTest {
         var data = new WalletEntryData();
         data.setId(123L);
 
-        var expected = new WalletEntryModel();
-        expected.setId(ID);
-
         populator.populateModel(model, data);
 
-        assertEquals(model, expected);
+        assertEquals(ID, model.getId());
+    }
+
+    @Test
+    public void populateModel_shouldReturnSameModel() {
+        var model = mock(WalletEntryModel.class);
+
+        var result = populator.populateModel(model, new WalletEntryData());
+
+        assertEquals(result, model);
     }
 }

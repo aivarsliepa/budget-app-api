@@ -36,13 +36,13 @@ public class CategoryService {
         return categoryPopulator.populateData(new CategoryData(), persistedModel);
     }
 
-    public void updateById(Long id, CategoryData categoryData) {
+    public void updateById(Long id, CategoryData data) {
         categoryRepository
                 .findByIdAndUserId(id, authService.getCurrentUserId())
                 .ifPresentOrElse(
-                        categoryModel -> categoryPopulator.populateModel(categoryModel, categoryData),
+                        model -> categoryPopulator.populateModel(model, data),
                         () -> {
-                            var msg = categoryData.toString() + " not found for userId: " + id;
+                            var msg = data.toString() + " not found for userId: " + id;
                             throw new ResourceNotFoundException(msg);
                         }
                 );

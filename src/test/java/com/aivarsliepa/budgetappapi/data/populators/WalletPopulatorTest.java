@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringRunner.class)
 public class WalletPopulatorTest {
@@ -66,5 +67,14 @@ public class WalletPopulatorTest {
         populator.populateModel(model, data);
 
         assertEquals(model, expected);
+    }
+
+    @Test
+    public void populateModel_shouldReturnSameModel() {
+        var model = mock(WalletModel.class);
+
+        var result = populator.populateModel(model, new WalletData());
+
+        assertEquals(result, model);
     }
 }

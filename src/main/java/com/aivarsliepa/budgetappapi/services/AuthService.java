@@ -38,7 +38,7 @@ public class AuthService {
 
         var persistedModel = userRepository.save(user);
 
-        String jwt = jwtTokenProvider.generateTokenFromId(persistedModel.getId());
+        var jwt = jwtTokenProvider.generateTokenFromId(persistedModel.getId());
 
         return new JwtAuthResponseBody(jwt);
     }

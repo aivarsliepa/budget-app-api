@@ -1,6 +1,7 @@
 package com.aivarsliepa.budgetappapi.data.user;
 
 import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,6 +24,9 @@ public class UserModel {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
+    private Set<WalletModel> wallets = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<CategoryModel> categories = new HashSet<>();

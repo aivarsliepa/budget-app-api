@@ -38,7 +38,7 @@ public class WalletControllerTest {
 //        var data = createValidData();
 //        var expectedResponseData = new WalletData[]{createValidData()};
 //
-//        given(walletService.getList()).willReturn(Collections.singletonList(data));
+//        given(walletService.getListForCurrentUser()).willReturn(Collections.singletonList(data));
 //
 //        var resString = mvc.perform(get(BASE_URL))
 //                           .andExpect(status().isOk())

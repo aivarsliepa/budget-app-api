@@ -26,7 +26,7 @@ public class WalletModel {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "walletId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "wallet")
     private List<WalletEntryModel> entries = new ArrayList<>();
 
 }

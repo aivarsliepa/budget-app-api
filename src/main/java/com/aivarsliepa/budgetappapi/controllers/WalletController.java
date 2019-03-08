@@ -5,6 +5,7 @@ import com.aivarsliepa.budgetappapi.data.wallet.WalletData;
 import com.aivarsliepa.budgetappapi.services.WalletService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class WalletController {
 
     @GetMapping
     public List<WalletData> getList() {
-        return walletService.getList();
+        return walletService.getListForCurrentUser();
     }
 
     @PostMapping
@@ -36,21 +37,14 @@ public class WalletController {
     }
 
     @PostMapping("/{walletId}")
-    public ResponseEntity<WalletData> updateById(@Valid @RequestBody final WalletData wallet,
-                                                 @PathVariable final Long walletId) {
-        return walletService.updateById(walletId, wallet)
-                            .map(ResponseEntity::ok)
-                            .orElse(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.OK)
+    public void updateById(@Valid @RequestBody final WalletData wallet, @PathVariable final Long walletId) {
+        walletService.updateById(walletId, wallet);
     }
 
     @DeleteMapping("/{walletId}")
-    public ResponseEntity deleteById(@PathVariable final Long walletId) {
-        var found = walletService.deleteById(walletId);
-
-        if (found) {
-            return ResponseEntity.ok().build();
-        }
-
-        return ResponseEntity.notFound().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteById(@PathVariable final Long walletId) {
+        walletService.deleteById(walletId);
     }
 }

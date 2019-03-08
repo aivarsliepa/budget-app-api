@@ -2,6 +2,7 @@ package com.aivarsliepa.budgetappapi.data.walletentry;
 
 
 import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
+import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,8 +19,9 @@ public class WalletEntryModel implements WalletEntry {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "wallet_id", nullable = false)
-    private Long walletId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private WalletModel wallet;
 
     @Column(name = "category_id", nullable = false)
     private Long categoryId;

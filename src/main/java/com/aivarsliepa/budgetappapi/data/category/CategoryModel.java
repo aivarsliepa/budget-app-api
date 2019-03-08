@@ -28,7 +28,7 @@ public class CategoryModel {
     @Column(name = "parent_id")
     private Long parentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
 
