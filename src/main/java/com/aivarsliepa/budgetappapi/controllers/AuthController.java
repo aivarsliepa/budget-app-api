@@ -7,20 +7,19 @@ import com.aivarsliepa.budgetappapi.data.payloads.RegisterRequestBody;
 import com.aivarsliepa.budgetappapi.services.AuthService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-@Controller
+@RestController
 @RequestMapping(URLPaths.Auth.BASE)
 @RequiredArgsConstructor
 public class AuthController {
     @NonNull
     private AuthService authService;
-
 
     @PostMapping(URLPaths.Auth.REGISTER)
     public JwtAuthResponseBody register(@Valid @RequestBody RegisterRequestBody data) {

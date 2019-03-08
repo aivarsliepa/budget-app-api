@@ -5,6 +5,7 @@ import com.aivarsliepa.budgetappapi.data.payloads.LoginRequestBody;
 import com.aivarsliepa.budgetappapi.data.payloads.RegisterRequestBody;
 import com.aivarsliepa.budgetappapi.data.user.UserModel;
 import com.aivarsliepa.budgetappapi.data.user.UserRepository;
+import com.aivarsliepa.budgetappapi.exceptions.UnauthenticatedException;
 import com.aivarsliepa.budgetappapi.security.JwtTokenProvider;
 import com.aivarsliepa.budgetappapi.security.UserPrincipal;
 import lombok.NonNull;
@@ -58,12 +59,19 @@ public class AuthService {
     }
 
     public UserModel getCurrentUser() {
+        var userId = getCurrentUserId();
+        return userRepository.findById(userId).orElseGet(() -> {
+            throw new UnauthenticatedException("Could not find user for id: " + userId);
+        });
+    }
+
+    Long getCurrentUserId() {
         var user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (user instanceof UserPrincipal) {
-            return ((UserPrincipal) user).getUserModel();
+            return ((UserPrincipal) user).getId();
         }
 
-        return null;
+        throw new UnauthenticatedException("User should be authenticated, but is is not");
     }
 }

@@ -4,6 +4,7 @@ import com.aivarsliepa.budgetappapi.data.category.CategoryData;
 import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.category.CategoryRepository;
+import com.aivarsliepa.budgetappapi.exceptions.ResourceNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,32 +29,39 @@ public class CategoryService {
 
     public CategoryData create(CategoryData categoryData) {
         var model = categoryPopulator.populateModel(new CategoryModel(), categoryData);
+        model.setUser(authService.getCurrentUser());
 
         var persistedModel = categoryRepository.save(model);
 
         return categoryPopulator.populateData(new CategoryData(), persistedModel);
     }
 
-    public Optional<CategoryData> updateById(Long id, CategoryData categoryData) {
-        return categoryRepository.findById(id).map(model -> {
-            categoryPopulator.populateModel(model, categoryData);
-            var updatedModel = categoryRepository.save(model);
-            return categoryPopulator.populateData(new CategoryData(), updatedModel);
-        });
+    public void updateById(Long id, CategoryData categoryData) {
+        categoryRepository
+                .findByIdAndUserId(id, authService.getCurrentUserId())
+                .ifPresentOrElse(
+                        categoryModel -> categoryPopulator.populateModel(categoryModel, categoryData),
+                        () -> {
+                            var msg = categoryData.toString() + " not found for userId: " + id;
+                            throw new ResourceNotFoundException(msg);
+                        }
+                );
     }
 
-    public boolean deleteById(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            return false;
+    public void deleteById(Long id) {
+        var userId = authService.getCurrentUserId();
+
+        if (!categoryRepository.existsByIdAndUserId(id, userId)) {
+            var msg = "Category not found for with id: " + id + "; for userId: " + userId;
+            throw new ResourceNotFoundException(msg);
         }
 
-        categoryRepository.deleteById(id);
-        return true;
+        categoryRepository.deleteByIdAndUserId(id, userId);
     }
 
-    public List<CategoryData> findAll() {
+    public List<CategoryData> getListForCurrentUser() {
         return categoryRepository
-                .findAll()
+                .findAllByUserId(authService.getCurrentUserId())
                 .stream()
                 .map(model -> categoryPopulator.populateData(new CategoryData(), model))
                 .collect(Collectors.toList());
@@ -61,7 +69,7 @@ public class CategoryService {
 
     public Optional<CategoryData> findById(Long id) {
         return categoryRepository
-                .findById(id)
+                .findByIdAndUserId(id, authService.getCurrentUserId())
                 .map((model -> categoryPopulator.populateData(new CategoryData(), model)));
     }
 }

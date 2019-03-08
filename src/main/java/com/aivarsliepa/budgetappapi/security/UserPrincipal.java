@@ -22,9 +22,6 @@ public class UserPrincipal implements UserDetails {
 
     private Collection<GrantedAuthority> authorities;
 
-    @JsonIgnore
-    private UserModel userModel;
-
     public static UserPrincipal create(UserModel user) {
         // application does not use roles
         var authorities = new ArrayList<GrantedAuthority>();
@@ -33,8 +30,7 @@ public class UserPrincipal implements UserDetails {
                 user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                authorities,
-                user
+                authorities
         );
     }
 

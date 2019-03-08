@@ -1,9 +1,9 @@
 package com.aivarsliepa.budgetappapi.data.populators;
 
 import com.aivarsliepa.budgetappapi.data.category.CategoryData;
+import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import com.aivarsliepa.budgetappapi.data.category.CategoryPopulator;
 import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
-import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,13 +25,10 @@ public class CategoryPopulatorTest {
         data.setParentId(PARENT_ID);
         data.setType(TYPE);
 
-        var expected = new CategoryModel();
-        expected.setParentId(PARENT_ID);
-        expected.setType(TYPE);
-
         var result = populator.populateModel(new CategoryModel(), data);
 
-        assertEquals(result, expected);
+        assertEquals(PARENT_ID, result.getParentId());
+        assertEquals(TYPE, result.getType());
     }
 
     @Test
@@ -41,14 +38,11 @@ public class CategoryPopulatorTest {
         model.setType(TYPE);
         model.setId(ID);
 
-        var expected = new CategoryData();
-        expected.setParentId(PARENT_ID);
-        expected.setType(TYPE);
-        expected.setId(ID);
-
         var result = populator.populateData(new CategoryData(), model);
 
-        assertEquals(result, expected);
+        assertEquals(PARENT_ID, result.getParentId());
+        assertEquals(TYPE, result.getType());
+        assertEquals(ID, result.getId());
     }
 
     @Test
@@ -59,11 +53,8 @@ public class CategoryPopulatorTest {
         var model = new CategoryModel();
         model.setId(ID);
 
-        var expected = new CategoryModel();
-        expected.setId(ID);
-
         populator.populateModel(model, data);
 
-        assertEquals(model, expected);
+        assertEquals(ID, model.getId());
     }
 }

@@ -1,12 +1,12 @@
 package com.aivarsliepa.budgetappapi.data.user;
 
-import com.aivarsliepa.budgetappapi.data.wallet.WalletModel;
+import com.aivarsliepa.budgetappapi.data.category.CategoryModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -24,6 +24,6 @@ public class UserModel {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private List<WalletModel> wallets = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private Set<CategoryModel> categories = new HashSet<>();
 }
