@@ -11,6 +11,7 @@ public class WalletEntryPopulator implements Populator<WalletEntryModel, WalletE
         target.setCategoryId(source.getCategoryId());
         target.setType(source.getType());
         target.setDate(source.getDate());
+
         target.setId(source.getId());
 
         return target;

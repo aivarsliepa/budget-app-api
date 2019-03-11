@@ -1,16 +1,18 @@
 package com.aivarsliepa.budgetappapi.data.wallet;
 
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Table(name = "wallets")
 public class WalletModel {
@@ -26,7 +28,6 @@ public class WalletModel {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "wallet")
-    private List<WalletEntryModel> entries = new ArrayList<>();
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "walletId")
+    private Set<WalletEntryModel> entries = new HashSet<>();
 }

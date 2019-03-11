@@ -16,7 +16,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -110,8 +111,6 @@ public class WalletServiceTest {
         given(walletRepository.existsByIdAndUserId(WALLET_ID, USER_ID)).willReturn(false);
 
         walletService.deleteById(WALLET_ID);
-
-        verify(walletRepository, never()).deleteByIdAndUserId(any(), any());
     }
 
     @Test
@@ -125,30 +124,22 @@ public class WalletServiceTest {
 
     @Test
     public void findById_shouldReturnOptionalWithPresentData_whenFound() {
-        var data = mock(WalletData.class);
+        var expected = mock(WalletData.class);
         var model = mock(WalletModel.class);
 
         given(walletRepository.findByIdAndUserId(WALLET_ID, USER_ID)).willReturn(Optional.of(model));
-        given(walletPopulator.populateData(any(WalletData.class), eq(model))).willReturn(data);
+        given(walletPopulator.populateData(any(WalletData.class), eq(model))).willReturn(expected);
 
-        var result = walletService.findById(WALLET_ID);
+        var actual = walletService.findById(WALLET_ID);
 
-        if (result.isEmpty()) {
-            fail("Result should not be empty!");
-        }
-
-        assertEquals(result.get(), data);
+        assertEquals(expected, actual);
     }
 
-    @Test
-    public void findById_shouldReturnEmptyOptional_whenNotFound() {
+    @Test(expected = ResourceNotFoundException.class)
+    public void findById_shouldThrow_whenNotFound() {
         given(walletRepository.findByIdAndUserId(WALLET_ID, USER_ID)).willReturn(Optional.empty());
 
-        var result = walletService.findById(WALLET_ID);
-
-        if (result.isPresent()) {
-            fail("Result should be empty!");
-        }
+        walletService.findById(WALLET_ID);
     }
 
 

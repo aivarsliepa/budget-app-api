@@ -5,12 +5,12 @@ import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryPopulator;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryRepository;
+import com.aivarsliepa.budgetappapi.exceptions.ResourceNotFoundException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,48 +25,73 @@ public class WalletEntryService {
     @NonNull
     private WalletRepository walletRepository;
 
+    @NonNull
+    private AuthService authService;
+
+    @NonNull
+    private WalletService walletService;
+
     public List<WalletEntryData> getListByWalletId(Long walletId) {
+        var userId = authService.getCurrentUserId();
+
         return walletEntryRepository
-                .findAllByWalletId(walletId)
+                .findAllByUserIdAndWalletId(userId, walletId)
                 .stream()
                 .map(model -> walletEntryPopulator.populateData(new WalletEntryData(), model))
                 .collect(Collectors.toList());
     }
 
 
-    public Optional<WalletEntryData> findByIdAndWalletId(Long entryId, Long walletId) {
+    public WalletEntryData findByIdAndWalletId(Long entryId, Long walletId) {
+        var userId = authService.getCurrentUserId();
+
         return walletEntryRepository
-                .findByIdAndWalletId(entryId, walletId)
-                .map((model -> walletEntryPopulator.populateData(new WalletEntryData(), model)));
+                .findByIdAndUserIdAndWalletId(entryId, userId, walletId)
+                .map((model -> walletEntryPopulator.populateData(new WalletEntryData(), model)))
+                .orElseThrow(() -> buildResourceNotFoundException(entryId, userId, walletId));
     }
 
-    public Optional<WalletEntryData> createEntryToWallet(Long walletId, WalletEntryData walletData) {
-        if (!walletRepository.existsById(walletId)) {
-            return Optional.empty();
-        }
+    // TODO: skip unit test until after hibernate behavior is tested
+    public WalletEntryData createEntryToWallet(Long walletId, WalletEntryData walletData) {
+        var userModel = authService.getCurrentUser();
+//        var userId = userModel.getId();
+//        var walletModel = walletService.findById(walletId);
 
         var model = walletEntryPopulator.populateModel(new WalletEntryModel(), walletData);
+//        model.setUser(userModel);
+//        model.setWallet()
+
+        // TODO: test if hibernate would fetch model automatically when saving or it would be null
+        model.setWalletId(walletId);
+        model.setUser(userModel);
+
         var persistedModel = walletEntryRepository.save(model);
-        var persistedData = walletEntryPopulator.populateData(new WalletEntryData(), persistedModel);
-        return Optional.of(persistedData);
+
+        return walletEntryPopulator.populateData(new WalletEntryData(), persistedModel);
     }
 
-    public boolean deleteByIdAndWalletId(Long entryId, Long walletId) {
-        if (!walletEntryRepository.existsByIdAndWalletId(entryId, walletId)) {
-            return false;
+    public void deleteByIdAndWalletId(Long entryId, Long walletId) {
+        var userId = authService.getCurrentUserId();
+
+        if (!walletEntryRepository.existsByIdAndUserIdAndWalletId(entryId, userId, walletId)) {
+            throw buildResourceNotFoundException(entryId, userId, walletId);
         }
 
-        walletEntryRepository.deleteByIdAndWalletId(entryId, walletId);
-        return true;
+        walletEntryRepository.deleteByIdAndUserIdAndWalletId(entryId, userId, walletId);
     }
 
-    public Optional<WalletEntryData> updateByIdAndWalletId(Long entryId, Long walletId, WalletEntryData data) {
-        return walletEntryRepository
-                .findByIdAndWalletId(entryId, walletId)
-                .map(model -> {
-                    walletEntryPopulator.populateModel(model, data);
-                    var updatedModel = walletEntryRepository.save(model);
-                    return walletEntryPopulator.populateData(new WalletEntryData(), updatedModel);
-                });
+    public void updateByIdAndWalletId(Long entryId, Long walletId, WalletEntryData data) {
+        var userId = authService.getCurrentUserId();
+
+        var model = walletEntryRepository
+                .findByIdAndUserIdAndWalletId(entryId, userId, walletId)
+                .orElseThrow(() -> buildResourceNotFoundException(entryId, userId, walletId));
+
+        walletEntryPopulator.populateModel(model, data);
+    }
+
+    private ResourceNotFoundException buildResourceNotFoundException(Long entryId, Long userId, Long walletId) {
+        var msg = "WalletEntry not found with ID: " + entryId + "; userID: " + userId + "; walletID: " + walletId;
+        return new ResourceNotFoundException(msg);
     }
 }

@@ -2,6 +2,7 @@ package com.aivarsliepa.budgetappapi.data.category;
 
 import com.aivarsliepa.budgetappapi.data.common.enums.CategoryType;
 import com.aivarsliepa.budgetappapi.data.user.UserModel;
+import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +36,9 @@ public class CategoryModel {
     @OneToMany(mappedBy = "parentId")
     private Set<CategoryModel> subCategories = new HashSet<>();
 
+    @OneToMany(mappedBy = "categoryId")
+    private Set<WalletEntryModel> entries = new HashSet<>();
+
     @PreUpdate
     @PrePersist
     public void prePersistOrUpdate() {
@@ -48,9 +52,15 @@ public class CategoryModel {
 
     @PreRemove
     public void preRemove() {
-        // Hibernate does not de-reference automatically, so have to do this manually on removal
+        // set parentID for sub-categories, can be null, which is fine
         for (var subCategory : subCategories) {
-            subCategory.setParentId(null);
+            subCategory.setParentId(parentId);
+        }
+
+        // set category for entries referencing this category
+        // TODO: think of what to do when parentID is null
+        for (var entry : entries) {
+            entry.setCategoryId(parentId);
         }
     }
 }

@@ -74,8 +74,6 @@ public class CategoryServiceTest {
         given(categoryRepository.existsByIdAndUserId(CATEGORY_ID, USER_ID)).willReturn(false);
 
         categoryService.deleteById(CATEGORY_ID);
-
-        verify(categoryRepository, never()).deleteByIdAndUserId(any(), any());
     }
 
     @Test

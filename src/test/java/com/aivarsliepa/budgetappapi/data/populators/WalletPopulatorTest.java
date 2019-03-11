@@ -17,25 +17,15 @@ public class WalletPopulatorTest {
 
     private final String NAME = "name";
     private final Long ID = 1L;
-    private final Long USER_ID = 2L;
 
     @Test
     public void shouldMapDataToModel() {
-        var model = new WalletModel();
-        model.setUserId(USER_ID);
-
-
         var data = new WalletData();
         data.setName(NAME);
-        data.setId(ID);
 
-        var expected = new WalletModel();
-        expected.setUserId(USER_ID);
-        expected.setName(NAME);
+        var model = populator.populateModel(new WalletModel(), data);
 
-        populator.populateModel(model, data);
-
-        assertEquals(model, expected);
+        assertEquals(NAME, model.getName());
     }
 
     @Test
@@ -44,13 +34,10 @@ public class WalletPopulatorTest {
         model.setName(NAME);
         model.setId(ID);
 
-        var expected = new WalletData();
-        expected.setName(NAME);
-        expected.setId(ID);
+        var data = populator.populateData(new WalletData(), model);
 
-        var result = populator.populateData(new WalletData(), model);
-
-        assertEquals(result, expected);
+        assertEquals(NAME, data.getName());
+        assertEquals(ID, data.getId());
     }
 
     @Test
@@ -61,12 +48,9 @@ public class WalletPopulatorTest {
         var data = new WalletData();
         data.setId(123L);
 
-        var expected = new WalletModel();
-        expected.setId(ID);
-
         populator.populateModel(model, data);
 
-        assertEquals(model, expected);
+        assertEquals(ID, model.getId());
     }
 
     @Test

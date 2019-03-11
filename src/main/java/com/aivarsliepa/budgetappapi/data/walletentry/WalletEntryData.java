@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
-public class WalletEntryData implements WalletEntry {
+public class WalletEntryData {
     private Long id;
 
     @NotNull

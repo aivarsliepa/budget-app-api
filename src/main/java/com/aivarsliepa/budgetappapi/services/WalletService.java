@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,28 +45,33 @@ public class WalletService {
         var userId = authService.getCurrentUserId();
 
         if (!walletRepository.existsByIdAndUserId(id, userId)) {
-            var msg = "Wallet not found for with id: " + id + "; for userId: " + userId;
-            throw new ResourceNotFoundException(msg);
+            throw buildResourceNotFoundException(id, userId);
         }
 
         walletRepository.deleteByIdAndUserId(id, userId);
     }
 
-    public Optional<WalletData> findById(Long id) {
+    public WalletData findById(Long id) {
+        var userId = authService.getCurrentUserId();
+
         return walletRepository
-                .findByIdAndUserId(id, authService.getCurrentUserId())
-                .map((model -> walletPopulator.populateData(new WalletData(), model)));
+                .findByIdAndUserId(id, userId)
+                .map((model -> walletPopulator.populateData(new WalletData(), model)))
+                .orElseThrow(() -> buildResourceNotFoundException(id, userId));
     }
 
     public void updateById(Long id, WalletData data) {
-        walletRepository
-                .findByIdAndUserId(id, authService.getCurrentUserId())
-                .ifPresentOrElse(
-                        model -> walletPopulator.populateModel(model, data),
-                        () -> {
-                            var msg = data.toString() + " not found for userId: " + id;
-                            throw new ResourceNotFoundException(msg);
-                        }
-                );
+        var userId = authService.getCurrentUserId();
+
+        var model = walletRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(() -> buildResourceNotFoundException(id, userId));
+
+        walletPopulator.populateModel(model, data);
+    }
+
+    private ResourceNotFoundException buildResourceNotFoundException(Long id, Long userId) {
+        var msg = "wallet does not exist with ID: " + id + "; userID: " + userId;
+        return new ResourceNotFoundException(msg);
     }
 }

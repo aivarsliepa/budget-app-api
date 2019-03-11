@@ -19,7 +19,7 @@ public class MvcExceptionHandlers {
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MethodArgumentNotValidException.class,
-            DataIntegrityViolationException.class,
+            DataIntegrityViolationException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleBadRequest(Exception ex) {

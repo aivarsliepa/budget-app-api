@@ -5,7 +5,7 @@ import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.services.WalletEntryService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,38 +24,25 @@ public class WalletEntryController {
     }
 
     @PostMapping
-    public ResponseEntity<WalletEntryData> createEntryToWallet(@PathVariable Long walletId,
-                                                               @Valid @RequestBody WalletEntryData data) {
-        return walletEntryService.createEntryToWallet(walletId, data)
-                                 .map(ResponseEntity::ok)
-                                 .orElse(ResponseEntity.badRequest().build());
+    public WalletEntryData createEntryToWallet(@PathVariable Long walletId, @Valid @RequestBody WalletEntryData data) {
+        return walletEntryService.createEntryToWallet(walletId, data);
     }
 
     @GetMapping("/{entryId}")
-    public ResponseEntity<WalletEntryData> findByIdAndWalletId(@PathVariable Long entryId,
-                                                               @PathVariable Long walletId) {
-        return walletEntryService.findByIdAndWalletId(entryId, walletId)
-                                 .map(ResponseEntity::ok)
-                                 .orElse(ResponseEntity.notFound().build());
+    public WalletEntryData findByIdAndWalletId(@PathVariable Long entryId, @PathVariable Long walletId) {
+        return walletEntryService.findByIdAndWalletId(entryId, walletId);
     }
 
     @PostMapping("/{entryId}")
-    public ResponseEntity<WalletEntryData> updateByIdAndWalletId(@Valid @RequestBody WalletEntryData data,
-                                                                 @PathVariable Long entryId,
-                                                                 @PathVariable Long walletId) {
-        return walletEntryService.updateByIdAndWalletId(entryId, walletId, data)
-                                 .map(ResponseEntity::ok)
-                                 .orElse(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.OK)
+    public void updateByIdAndWalletId(@Valid @RequestBody WalletEntryData data, @PathVariable Long entryId,
+                                      @PathVariable Long walletId) {
+        walletEntryService.updateByIdAndWalletId(entryId, walletId, data);
     }
 
     @DeleteMapping("/{entryId}")
-    public ResponseEntity deleteByIdAndWalletId(@PathVariable Long entryId, @PathVariable Long walletId) {
-        var exists = walletEntryService.deleteByIdAndWalletId(entryId, walletId);
-
-        if (exists) {
-            return ResponseEntity.ok().build();
-        }
-
-        return ResponseEntity.notFound().build();
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteByIdAndWalletId(@PathVariable Long entryId, @PathVariable Long walletId) {
+        walletEntryService.deleteByIdAndWalletId(entryId, walletId);
     }
 }

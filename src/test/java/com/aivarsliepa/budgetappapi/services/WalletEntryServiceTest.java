@@ -5,6 +5,7 @@ import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryData;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryModel;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryPopulator;
 import com.aivarsliepa.budgetappapi.data.walletentry.WalletEntryRepository;
+import com.aivarsliepa.budgetappapi.exceptions.ResourceNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +16,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -25,6 +27,7 @@ public class WalletEntryServiceTest {
 
     private static final Long WALLET_ID = 3L;
     private static final Long ENTRY_ID = 1L;
+    private static final Long USER_ID = 2L;
 
     private WalletEntryService walletEntryService;
 
@@ -37,10 +40,18 @@ public class WalletEntryServiceTest {
     @MockBean
     private WalletEntryPopulator walletEntryPopulator;
 
+    @MockBean
+    private AuthService authService;
+
+    @MockBean
+    private WalletService walletService;
 
     @Before
     public void setUp() {
-        walletEntryService = new WalletEntryService(walletEntryRepository, walletEntryPopulator, walletRepository);
+        walletEntryService = new WalletEntryService(walletEntryRepository, walletEntryPopulator, walletRepository,
+                                                    authService, walletService);
+
+        given(authService.getCurrentUserId()).willReturn(USER_ID);
     }
 
     @Test
@@ -51,140 +62,106 @@ public class WalletEntryServiceTest {
         var model1 = mock(WalletEntryModel.class);
         var model2 = mock(WalletEntryModel.class);
 
-        given(walletEntryRepository.findAllByWalletId(WALLET_ID)).willReturn(Arrays.asList(model1, model2));
+        given(walletEntryRepository.findAllByUserIdAndWalletId(USER_ID, WALLET_ID))
+                .willReturn(Arrays.asList(model1, model2));
         given(walletEntryPopulator.populateData(any(WalletEntryData.class), eq(model1))).willReturn(data1);
         given(walletEntryPopulator.populateData(any(WalletEntryData.class), eq(model2))).willReturn(data2);
 
         var result = walletEntryService.getListByWalletId(WALLET_ID);
+
         assertThat(result, containsInAnyOrder(data1, data2));
     }
 
     @Test
-    public void findByIdAndWalletId_shouldReturnOptionalWithPresentData_whenFound() {
+    public void findByIdAndWalletId_shouldReturnData_whenFound() {
         var data = mock(WalletEntryData.class);
         var model = mock(WalletEntryModel.class);
 
-        given(walletEntryRepository.findByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(Optional.of(model));
+        given(walletEntryRepository.findByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID))
+                .willReturn(Optional.of(model));
         given(walletEntryPopulator.populateData(any(WalletEntryData.class), eq(model))).willReturn(data);
 
-        var result = walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID);
+        var actual = walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID);
 
-        if (result.isEmpty()) {
-            fail("Result should not be empty!");
-        }
-
-        assertEquals(result.get(), data);
+        assertEquals(data, actual);
     }
 
-    @Test
-    public void findByIdAndWalletId_shouldReturnEmptyOptional_whenNotFound() {
-        given(walletEntryRepository.findByIdAndWalletId(any(), any())).willReturn(Optional.empty());
+    @Test(expected = ResourceNotFoundException.class)
+    public void findByIdAndWalletId_shouldThrow_whenNotFound() {
+        given(walletEntryRepository.findByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID))
+                .willReturn(Optional.empty());
 
-        var result = walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID);
-
-        if (result.isPresent()) {
-            fail("Result should be empty!");
-        }
+        walletEntryService.findByIdAndWalletId(ENTRY_ID, WALLET_ID);
     }
 
-    @Test
-    public void createEntryToWallet_shouldReturnEmptyOptional_whenWalletDoesNotExist() {
-        var data = mock(WalletEntryData.class);
+//    @Test
+//    public void createEntryToWallet_shouldPersist_whenWalletExists() {
+//        var data = mock(WalletEntryData.class);
+//        var model = mock(WalletEntryModel.class);
+//
+//        given(walletRepository.existsById(WALLET_ID)).willReturn(true);
+//        given(walletEntryPopulator.populateModel(any(WalletEntryModel.class), eq(data))).willReturn(model);
+//        given(walletEntryPopulator.populateData(any(WalletEntryData.class), nullable(WalletEntryModel.class)))
+//                .willReturn(data);
+//
+//        walletEntryService.createEntryToWallet(WALLET_ID, data);
+//
+//        verify(walletEntryRepository).save(model);
+//    }
+//
+//    @Test
+//    public void createEntryToWallet_shouldReturnData_whenWalletExists() {
+//        var inputData = mock(WalletEntryData.class);
+//        var expected = mock(WalletEntryData.class);
+//        var model1 = mock(WalletEntryModel.class);
+//        var model2 = mock(WalletEntryModel.class);
+//
+//        given(walletRepository.existsById(WALLET_ID)).willReturn(true);
+//        given(walletEntryPopulator.populateModel(any(WalletEntryModel.class), eq(inputData))).willReturn(model1);
+//        given(walletEntryRepository.save(model1)).willReturn(model2);
+//        given(walletEntryPopulator.populateData(any(WalletEntryData.class), eq(model2))).willReturn(expected);
+//
+//        var result = walletEntryService.createEntryToWallet(WALLET_ID, inputData);
+//
+//        assertEquals(expected, result);
+//    }
 
-        given(walletRepository.existsById(WALLET_ID)).willReturn(false);
+    @Test(expected = ResourceNotFoundException.class)
+    public void deleteByIdAndWalletId_shouldThrow_whenNotFound() {
+        given(walletEntryRepository.existsByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID)).willReturn(false);
 
-        var result = walletEntryService.createEntryToWallet(WALLET_ID, data);
-
-        if (result.isPresent()) {
-            fail("Result should be empty!");
-        }
-    }
-
-    @Test
-    public void createEntryToWallet_shouldPersist_whenWalletExists() {
-        var data = mock(WalletEntryData.class);
-        var model = mock(WalletEntryModel.class);
-
-        given(walletRepository.existsById(WALLET_ID)).willReturn(true);
-        given(walletEntryPopulator.populateModel(any(WalletEntryModel.class), eq(data))).willReturn(model);
-        given(walletEntryPopulator.populateData(any(WalletEntryData.class), nullable(WalletEntryModel.class)))
-                .willReturn(data);
-
-        walletEntryService.createEntryToWallet(WALLET_ID, data);
-
-        verify(walletEntryRepository).save(model);
-    }
-
-    @Test
-    public void createEntryToWallet_shouldReturnData_whenWalletExists() {
-        var inputData = mock(WalletEntryData.class);
-        var expected = mock(WalletEntryData.class);
-        var model1 = mock(WalletEntryModel.class);
-        var model2 = mock(WalletEntryModel.class);
-
-        given(walletRepository.existsById(WALLET_ID)).willReturn(true);
-        given(walletEntryPopulator.populateModel(any(WalletEntryModel.class), eq(inputData))).willReturn(model1);
-        given(walletEntryRepository.save(model1)).willReturn(model2);
-        given(walletEntryPopulator.populateData(any(WalletEntryData.class), eq(model2))).willReturn(expected);
-
-        var result = walletEntryService.createEntryToWallet(WALLET_ID, inputData);
-
-        if (result.isEmpty()) {
-            fail("Result should not be empty!");
-        }
-
-        assertEquals(result.get(), expected);
-    }
-
-    @Test
-    public void deleteByIdAndWalletId_shouldNotDelete_andShouldReturnFalse_whenRecordDoesNotExist() {
-        given(walletEntryRepository.existsByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(false);
-
-        var result = walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
-
-        assertFalse(result);
-        verify(walletEntryRepository, never()).deleteByIdAndWalletId(any(), any());
+        walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
     }
 
     @Test
     public void deleteByIdAndWalletId_shouldDelete_andShouldReturnTrue_whenRecordDoesExist() {
-        given(walletEntryRepository.existsByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(true);
+        given(walletEntryRepository.existsByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID)).willReturn(true);
 
-        var result = walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
+        walletEntryService.deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
 
-        assertTrue(result);
-        verify(walletEntryRepository).deleteByIdAndWalletId(ENTRY_ID, WALLET_ID);
+        verify(walletEntryRepository).deleteByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID);
     }
 
     @Test
-    public void updateById_shouldReturnOptionalWithPresentData_whenFoundAndUpdated() {
+    public void updateById_shouldPopulateModel_whenFound() {
         var inputData = mock(WalletEntryData.class);
-        var expected = mock(WalletEntryData.class);
         var model = mock(WalletEntryModel.class);
 
-        given(walletEntryRepository.findByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(Optional.of(model));
-        given(walletEntryPopulator.populateData(any(WalletEntryData.class), nullable(WalletEntryModel.class)))
-                .willReturn(expected);
+        given(walletEntryRepository.findByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID))
+                .willReturn(Optional.of(model));
 
-        var result = walletEntryService.updateByIdAndWalletId(ENTRY_ID, WALLET_ID, inputData);
+        walletEntryService.updateByIdAndWalletId(ENTRY_ID, WALLET_ID, inputData);
 
-        if (result.isEmpty()) {
-            fail("Result should not be empty!");
-        }
-
-        assertEquals(result.get(), expected);
+        verify(walletEntryPopulator).populateModel(model, inputData);
     }
 
-    @Test
+    @Test(expected = ResourceNotFoundException.class)
     public void updateById_shouldReturnEmptyOptional_whenNotFound() {
         var inputData = mock(WalletEntryData.class);
 
-        given(walletEntryRepository.findByIdAndWalletId(ENTRY_ID, WALLET_ID)).willReturn(Optional.empty());
+        given(walletEntryRepository.findByIdAndUserIdAndWalletId(ENTRY_ID, USER_ID, WALLET_ID))
+                .willReturn(Optional.empty());
 
-        var result = walletEntryService.updateByIdAndWalletId(ENTRY_ID, WALLET_ID, inputData);
-
-        if (result.isPresent()) {
-            fail("Result should be empty!");
-        }
+        walletEntryService.updateByIdAndWalletId(ENTRY_ID, WALLET_ID, inputData);
     }
 }

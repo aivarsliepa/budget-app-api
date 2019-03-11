@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WalletEntryRepository extends JpaRepository<WalletEntryModel, Long> {
-    List<WalletEntryModel> findAllByWalletId(Long walletId);
+    List<WalletEntryModel> findAllByUserIdAndWalletId(Long userId, Long walletId);
 
-    Optional<WalletEntryModel> findByIdAndWalletId(Long entryId, Long walletId);
+    Optional<WalletEntryModel> findByIdAndUserIdAndWalletId(Long id, Long userId, Long walletId);
 
-    boolean existsByIdAndWalletId(Long entryId, Long walletId);
+    boolean existsByIdAndUserIdAndWalletId(Long id, Long userId, Long walletId);
 
-    void deleteByIdAndWalletId(Long entryId, Long walletId);
+    void deleteByIdAndUserIdAndWalletId(Long id, Long userId, Long walletId);
 }
