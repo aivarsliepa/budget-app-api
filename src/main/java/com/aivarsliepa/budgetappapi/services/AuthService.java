@@ -60,9 +60,10 @@ public class AuthService {
 
     public UserModel getCurrentUser() {
         var userId = getCurrentUserId();
-        return userRepository.findById(userId).orElseGet(() -> {
-            throw new UnauthenticatedException("Could not find user for id: " + userId);
-        });
+
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new UnauthenticatedException("Could not find user for id: " + userId));
     }
 
     Long getCurrentUserId() {

@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,23 +36,20 @@ public class CategoryService {
     }
 
     public void updateById(Long id, CategoryData data) {
-        categoryRepository
-                .findByIdAndUserId(id, authService.getCurrentUserId())
-                .ifPresentOrElse(
-                        model -> categoryPopulator.populateModel(model, data),
-                        () -> {
-                            var msg = data.toString() + " not found for userId: " + id;
-                            throw new ResourceNotFoundException(msg);
-                        }
-                );
+        var userId = authService.getCurrentUserId();
+
+        var model = categoryRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(() -> buildResourceNotFoundException(id, userId));
+
+        categoryPopulator.populateModel(model, data);
     }
 
     public void deleteById(Long id) {
         var userId = authService.getCurrentUserId();
 
         if (!categoryRepository.existsByIdAndUserId(id, userId)) {
-            var msg = "Category not found for with id: " + id + "; for userId: " + userId;
-            throw new ResourceNotFoundException(msg);
+            throw buildResourceNotFoundException(id, userId);
         }
 
         categoryRepository.deleteByIdAndUserId(id, userId);
@@ -67,9 +63,17 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<CategoryData> findById(Long id) {
+    public CategoryData findById(Long id) {
+        var userId = authService.getCurrentUserId();
+
         return categoryRepository
-                .findByIdAndUserId(id, authService.getCurrentUserId())
-                .map((model -> categoryPopulator.populateData(new CategoryData(), model)));
+                .findByIdAndUserId(id, userId)
+                .map((model -> categoryPopulator.populateData(new CategoryData(), model)))
+                .orElseThrow(() -> buildResourceNotFoundException(id, userId));
+    }
+
+    private ResourceNotFoundException buildResourceNotFoundException(Long id, Long userId) {
+        var msg = "Category not found with ID: " + id + "; userID: " + userId;
+        return new ResourceNotFoundException(msg);
     }
 }

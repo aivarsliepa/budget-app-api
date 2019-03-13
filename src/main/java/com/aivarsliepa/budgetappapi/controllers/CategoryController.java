@@ -30,10 +30,8 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<CategoryData> getById(@PathVariable final Long categoryId) {
-        return categoryService.findById(categoryId)
-                              .map(ResponseEntity::ok)
-                              .orElse(ResponseEntity.notFound().build());
+    public CategoryData getById(@PathVariable final Long categoryId) {
+        return categoryService.findById(categoryId);
     }
 
     @PostMapping("/{categoryId}")

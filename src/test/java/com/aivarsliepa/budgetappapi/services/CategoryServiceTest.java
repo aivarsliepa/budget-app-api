@@ -17,7 +17,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -102,7 +103,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void findById_shouldReturnOptionalWithPresentData_whenFound() {
+    public void findById_shouldReturnData_whenFound() {
         var data = mock(CategoryData.class);
         var model = mock(CategoryModel.class);
 
@@ -111,22 +112,14 @@ public class CategoryServiceTest {
 
         var result = categoryService.findById(CATEGORY_ID);
 
-        if (result.isEmpty()) {
-            fail("Result should not be empty!");
-        }
-
-        assertEquals(result.get(), data);
+        assertEquals(data, result);
     }
 
-    @Test
-    public void findById_shouldReturnEmptyOptional_whenNotFound() {
+    @Test(expected = ResourceNotFoundException.class)
+    public void findById_shouldThrow_whenNotFound() {
         given(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).willReturn(Optional.empty());
 
-        var result = categoryService.findById(CATEGORY_ID);
-
-        if (result.isPresent()) {
-            fail("Result should be empty!");
-        }
+        categoryService.findById(CATEGORY_ID);
     }
 
     @Test

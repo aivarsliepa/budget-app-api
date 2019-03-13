@@ -17,18 +17,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository
+        return userRepository
                 .findByUsername(username)
+                .map(UserPrincipal::create)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username : " + username));
-
-        return UserPrincipal.create(user);
     }
 
     public UserDetails loadUserById(Long id) {
-        var user = userRepository
+        return userRepository
                 .findById(id)
+                .map(UserPrincipal::create)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id : " + id));
-
-        return UserPrincipal.create(user);
     }
 }
